@@ -6,6 +6,7 @@ Integrates wake word detection, STT, TTS, and conversation management
 import asyncio
 import logging
 import time
+from datetime import datetime
 from typing import Dict, Any, Optional, Callable
 import numpy as np
 
@@ -339,3 +340,155 @@ Hardware Configuration:
         except Exception as e:
             logger.error(f"Performance report generation failed: {e}")
             return "Performance report unavailable"
+    
+    async def test_tts_output(self, text: str) -> bool:
+        """Test TTS output for web interface"""
+        try:
+            if not self.tts_engine:
+                logger.error("TTS engine not available")
+                return False
+            
+            result = await self.tts_engine.speak_immediately(text)
+            return result
+            
+        except Exception as e:
+            logger.error(f"TTS test failed: {e}")
+            return False
+    
+    async def test_wake_word_response(self) -> bool:
+        """Test wake word response"""
+        try:
+            if not self.tts_engine:
+                logger.error("TTS engine not available")
+                return False
+            
+            result = await self.tts_engine.speak_immediately("بله سرورم")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Wake word response test failed: {e}")
+            return False
+    
+    async def test_stt_ready(self) -> bool:
+        """Check if STT is ready"""
+        try:
+            if not self.stt_engine:
+                return False
+            
+            # Check if STT engine has a ready method
+            if hasattr(self.stt_engine, 'is_ready'):
+                return self.stt_engine.is_ready()
+            else:
+                # If no ready method, assume it's ready if initialized
+                return self.stt_engine is not None
+                
+        except Exception as e:
+            logger.error(f"STT ready check failed: {e}")
+            return False
+    
+    def get_discovered_devices(self) -> Dict[str, Any]:
+        """Get discovered smart home devices"""
+        try:
+            # This would integrate with the smart home controller
+            # For now, return a mock device list
+            return {
+                "چراغ نشیمن": {
+                    "type": "light",
+                    "status": "on",
+                    "protocol": "kasa",
+                    "persian_name": "چراغ نشیمن"
+                },
+                "پریز آشپزخانه": {
+                    "type": "outlet", 
+                    "status": "off",
+                    "protocol": "kasa",
+                    "persian_name": "پریز آشپزخانه"
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Device discovery failed: {e}")
+            return {}
+    
+    async def execute_device_command(self, persian_command: str) -> Dict[str, Any]:
+        """Execute smart home device command"""
+        try:
+            # This would integrate with the smart home controller
+            # For now, return a mock response
+            logger.info(f"Executing device command: {persian_command}")
+            
+            # Simple mock response based on command content
+            if "روشن" in persian_command:
+                return {
+                    'success': True,
+                    'response': 'دستگاه روشن شد',
+                    'command': persian_command
+                }
+            elif "خاموش" in persian_command:
+                return {
+                    'success': True,
+                    'response': 'دستگاه خاموش شد',
+                    'command': persian_command
+                }
+            else:
+                return {
+                    'success': False,
+                    'response': 'متوجه دستور نشدم',
+                    'command': persian_command
+                }
+                
+        except Exception as e:
+            logger.error(f"Device command execution failed: {e}")
+            return {
+                'success': False,
+                'response': f'خطا در اجرای دستور: {str(e)}',
+                'command': persian_command
+            }
+    
+    async def start_wake_word_detection(self) -> bool:
+        """Start wake word detection for web interface"""
+        try:
+            if not self.wake_detector:
+                logger.error("Wake word detector not available")
+                return False
+            
+            if not self.is_listening:
+                await self.start_listening()
+            
+            return self.is_listening
+            
+        except Exception as e:
+            logger.error(f"Wake word detection start failed: {e}")
+            return False
+    
+    def get_complete_status(self) -> Dict[str, Any]:
+        """Get complete system status for web interface"""
+        try:
+            return {
+                'timestamp': datetime.now().isoformat(),
+                'is_initialized': self.is_initialized,
+                'is_listening': self.is_listening,
+                'conversation_active': self.conversation_active,
+                'hardware_config': self.hardware_config,
+                'performance_stats': self.performance_stats,
+                'tts_ready': self.tts_engine is not None,
+                'stt_ready': self.stt_engine is not None,
+                'wake_word_ready': self.wake_detector is not None,
+                'devices': self.get_discovered_devices(),
+                'listening': self.is_listening
+            }
+            
+        except Exception as e:
+            logger.error(f"Status retrieval failed: {e}")
+            return {
+                'timestamp': datetime.now().isoformat(),
+                'error': str(e),
+                'is_initialized': False,
+                'is_listening': False,
+                'conversation_active': False,
+                'tts_ready': False,
+                'stt_ready': False,
+                'wake_word_ready': False,
+                'devices': {},
+                'listening': False
+            }

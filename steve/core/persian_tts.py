@@ -5,19 +5,39 @@ Human-indistinguishable Persian speech synthesis
 
 import asyncio
 import numpy as np
-import torch
-import torchaudio
-import soundfile as sf
 from typing import Dict, Any, Optional, List, Tuple
 import logging
 import time
-import requests
 import json
 from pathlib import Path
 import tempfile
 import os
 import psutil
 import gc
+
+# Optional imports
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    requests = None
+    REQUESTS_AVAILABLE = False
+
+try:
+    import torch
+    import torchaudio
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    torchaudio = None
+    TORCH_AVAILABLE = False
+
+try:
+    import soundfile as sf
+    SOUNDFILE_AVAILABLE = True
+except ImportError:
+    sf = None
+    SOUNDFILE_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 

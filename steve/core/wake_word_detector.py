@@ -5,14 +5,40 @@ Real implementation for detecting "هی استیو" with high accuracy and low l
 
 import asyncio
 import numpy as np
-import pyaudio
-import webrtcvad
-import librosa
-import torch
-import torchaudio
 from typing import Optional, Callable, Dict, Any
 import logging
 from pathlib import Path
+
+# Optional imports
+try:
+    import pyaudio
+    PYAUDIO_AVAILABLE = True
+except ImportError:
+    pyaudio = None
+    PYAUDIO_AVAILABLE = False
+
+try:
+    import webrtcvad
+    WEBRTCVAD_AVAILABLE = True
+except ImportError:
+    webrtcvad = None
+    WEBRTCVAD_AVAILABLE = False
+
+try:
+    import librosa
+    LIBROSA_AVAILABLE = True
+except ImportError:
+    librosa = None
+    LIBROSA_AVAILABLE = False
+
+try:
+    import torch
+    import torchaudio
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    torchaudio = None
+    TORCH_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +51,13 @@ class PersianWakeWordDetector:
     def __init__(self, hardware_config: Dict[str, Any]):
         self.hardware_profile = hardware_config
         self.audio_config = self._configure_audio_pipeline()
-        self.vad = webrtcvad.Vad(3)  # Aggressive voice activity detection
+        self.vad = webrtcvad.Vad(3) if WEBRTCVAD_AVAILABLE else None  # Aggressive voice activity detection
         
         # Audio stream configuration
         self.sample_rate = 16000
         self.chunk_size = 1024
         self.channels = 1
-        self.format = pyaudio.paInt16
+        self.format = pyaudio.paInt16 if PYAUDIO_AVAILABLE else None
         
         # Wake word detection parameters
         self.detection_threshold = 0.7
@@ -56,7 +82,7 @@ class PersianWakeWordDetector:
             "sample_rate": 16000,
             "chunk_size": 1024,
             "channels": 1,
-            "format": pyaudio.paInt16,
+            "format": pyaudio.paInt16 if PYAUDIO_AVAILABLE else None,
             "input_device_index": None,  # Auto-detect
             "frames_per_buffer": 1024
         }
@@ -90,27 +116,25 @@ class PersianWakeWordDetector:
     async def initialize(self) -> bool:
         """Initialize audio system and wake word detection"""
         try:
-            # Try to initialize PyAudio
-            try:
-                import pyaudio
-                self.pyaudio_instance = pyaudio.PyAudio()
-                
-                # Find best audio input device
-                input_device = self._find_best_input_device()
-                self.audio_config["input_device_index"] = input_device
-                
-                logger.info(f"Audio system initialized with device: {input_device}")
-                return True
-                
-            except ImportError:
+            if PYAUDIO_AVAILABLE:
+                try:
+                    self.pyaudio_instance = pyaudio.PyAudio()
+                    
+                    # Find best audio input device
+                    input_device = self._find_best_input_device()
+                    self.audio_config["input_device_index"] = input_device
+                    
+                    logger.info(f"Audio system initialized with device: {input_device}")
+                    return True
+                    
+                except Exception as e:
+                    logger.error(f"PyAudio initialization failed: {e}")
+                    # Try fallback initialization
+                    self.pyaudio_instance = None
+                    return True
+            else:
                 logger.warning("PyAudio not available. Wake word detection will use fallback mode.")
                 # Initialize without PyAudio for testing
-                self.pyaudio_instance = None
-                return True
-                
-            except Exception as e:
-                logger.error(f"PyAudio initialization failed: {e}")
-                # Try fallback initialization
                 self.pyaudio_instance = None
                 return True
             
@@ -203,6 +227,9 @@ class PersianWakeWordDetector:
     
     def _audio_callback(self, in_data, frame_count, time_info, status):
         """Audio stream callback for real-time processing"""
+        if not PYAUDIO_AVAILABLE:
+            return (None, None)
+            
         if not self.is_listening:
             return (None, pyaudio.paComplete)
         
@@ -268,27 +295,28 @@ class PersianWakeWordDetector:
         """Check if audio contains voice activity"""
         try:
             # Try to use WebRTC VAD if available
-            try:
-                # Convert to 16-bit PCM for VAD
-                audio_16bit = (audio_array * 32767).astype(np.int16)
-                
-                # Check voice activity in chunks
-                chunk_size = int(0.01 * self.sample_rate)  # 10ms chunks
-                for i in range(0, len(audio_16bit) - chunk_size, chunk_size):
-                    chunk = audio_16bit[i:i + chunk_size]
-                    if self.vad.is_speech(chunk.tobytes(), self.sample_rate):
-                        return True
-                
-                return False
-                
-            except Exception as e:
-                logger.debug(f"WebRTC VAD failed: {e}, using energy-based detection")
-                
-                # Fallback: simple energy-based voice activity detection
-                energy = np.mean(audio_array ** 2)
-                energy_threshold = 0.001  # Adjust based on environment
-                
-                return energy > energy_threshold
+            if WEBRTCVAD_AVAILABLE and self.vad:
+                try:
+                    # Convert to 16-bit PCM for VAD
+                    audio_16bit = (audio_array * 32767).astype(np.int16)
+                    
+                    # Check voice activity in chunks
+                    chunk_size = int(0.01 * self.sample_rate)  # 10ms chunks
+                    for i in range(0, len(audio_16bit) - chunk_size, chunk_size):
+                        chunk = audio_16bit[i:i + chunk_size]
+                        if self.vad.is_speech(chunk.tobytes(), self.sample_rate):
+                            return True
+                    
+                    return False
+                    
+                except Exception as e:
+                    logger.debug(f"WebRTC VAD failed: {e}, using energy-based detection")
+            
+            # Fallback: simple energy-based voice activity detection
+            energy = np.mean(audio_array ** 2)
+            energy_threshold = 0.001  # Adjust based on environment
+            
+            return energy > energy_threshold
             
         except Exception as e:
             logger.error(f"VAD error: {e}")
@@ -299,44 +327,44 @@ class PersianWakeWordDetector:
         """Extract features for wake word detection"""
         try:
             # Try to use librosa for feature extraction
-            try:
-                import librosa
-                
-                # MFCC features
-                mfccs = librosa.feature.mfcc(
-                    y=audio_array,
-                    sr=self.sample_rate,
-                    n_mfcc=13,
-                    n_fft=2048,
-                    hop_length=512
-                )
-                
-                # Delta and delta-delta features
-                delta_mfccs = librosa.feature.delta(mfccs)
-                delta2_mfccs = librosa.feature.delta(mfccs, order=2)
-                
-                # Spectral features
-                spectral_centroids = librosa.feature.spectral_centroid(
-                    y=audio_array, sr=self.sample_rate
-                )
-                
-                # Zero crossing rate
-                zcr = librosa.feature.zero_crossing_rate(audio_array)
-                
-                return {
-                    "mfccs": mfccs,
-                    "delta_mfccs": delta_mfccs,
-                    "delta2_mfccs": delta2_mfccs,
-                    "spectral_centroids": spectral_centroids,
-                    "zcr": zcr,
-                    "duration": len(audio_array) / self.sample_rate,
-                    "energy": np.mean(audio_array ** 2)
-                }
-                
-            except ImportError:
+            if LIBROSA_AVAILABLE:
+                try:
+                    # MFCC features
+                    mfccs = librosa.feature.mfcc(
+                        y=audio_array,
+                        sr=self.sample_rate,
+                        n_mfcc=13,
+                        n_fft=2048,
+                        hop_length=512
+                    )
+                    
+                    # Delta and delta-delta features
+                    delta_mfccs = librosa.feature.delta(mfccs)
+                    delta2_mfccs = librosa.feature.delta(mfccs, order=2)
+                    
+                    # Spectral features
+                    spectral_centroids = librosa.feature.spectral_centroid(
+                        y=audio_array, sr=self.sample_rate
+                    )
+                    
+                    # Zero crossing rate
+                    zcr = librosa.feature.zero_crossing_rate(audio_array)
+                    
+                    return {
+                        "mfccs": mfccs,
+                        "delta_mfccs": delta_mfccs,
+                        "delta2_mfccs": delta2_mfccs,
+                        "spectral_centroids": spectral_centroids,
+                        "zcr": zcr,
+                        "duration": len(audio_array) / self.sample_rate,
+                        "energy": np.mean(audio_array ** 2)
+                    }
+                    
+                except Exception as e:
+                    logger.warning(f"librosa feature extraction failed: {e}, using basic features")
+                    return self._extract_basic_features(audio_array)
+            else:
                 logger.warning("librosa not available, using basic features")
-                
-                # Fallback: basic features without librosa
                 return self._extract_basic_features(audio_array)
             
         except Exception as e:
