@@ -603,3 +603,61 @@ class SmartHomeController:
             
         except Exception as e:
             logger.error(f"Smart home cleanup error: {e}")
+    
+    def get_all_devices(self) -> Dict[str, Any]:
+        """Get all discovered devices with their status"""
+        try:
+            devices_status = {}
+            
+            for device_name, device_info in self.devices.items():
+                # Find Persian name
+                persian_name = None
+                for p_name, eng_name in self.persian_device_names.items():
+                    if eng_name == device_name:
+                        persian_name = p_name
+                        break
+                
+                # Get device status
+                device_status = "unknown"
+                try:
+                    if device_info["protocol"] == "kasa":
+                        device = device_info["device"]
+                        device_status = "on" if device.is_on else "off"
+                    elif device_info["protocol"] == "hue":
+                        device = device_info["device"]
+                        device_status = "on" if device.on else "off"
+                except:
+                    device_status = "unknown"
+                
+                devices_status[device_name] = {
+                    "persian_name": persian_name or device_name,
+                    "type": device_info["type"],
+                    "status": device_status,
+                    "protocol": device_info["protocol"],
+                    "capabilities": device_info["capabilities"]
+                }
+            
+            return devices_status
+            
+        except Exception as e:
+            logger.error(f"Get all devices failed: {e}")
+            return {}
+    
+    async def execute_persian_command(self, persian_command: str) -> Dict[str, Any]:
+        """Execute Persian command and return structured result"""
+        try:
+            result = await self.control_device_by_persian_command(persian_command)
+            
+            return {
+                'success': True,
+                'response': result,
+                'command': persian_command
+            }
+            
+        except Exception as e:
+            logger.error(f"Persian command execution failed: {e}")
+            return {
+                'success': False,
+                'response': f'خطا در اجرای دستور: {str(e)}',
+                'command': persian_command
+            }

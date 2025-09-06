@@ -5,15 +5,29 @@ Hardware-optimized transcription with Persian language support
 
 import asyncio
 import numpy as np
-import torch
-import torchaudio
-import whisper
 from typing import Dict, Any, Optional, List, Tuple
 import logging
 import time
 from pathlib import Path
 import psutil
 import gc
+
+# Optional imports
+try:
+    import torch
+    import torchaudio
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    torchaudio = None
+    TORCH_AVAILABLE = False
+
+try:
+    import whisper
+    WHISPER_AVAILABLE = True
+except ImportError:
+    whisper = None
+    WHISPER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 

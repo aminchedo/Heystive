@@ -8,9 +8,16 @@ import logging
 import json
 import time
 from typing import Dict, Any, Optional, List, Tuple
-import openai
 from pathlib import Path
 import os
+
+# Optional imports
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    openai = None
+    OPENAI_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
