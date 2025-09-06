@@ -1,0 +1,1 @@
+# Smart home integration components
