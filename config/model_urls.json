@@ -1,0 +1,173 @@
+{
+  "model_registry": {
+    "whisper_tiny": {
+      "name": "Whisper Tiny",
+      "description": "Smallest Whisper model for Persian speech recognition (39MB)",
+      "url": "https://openaipublic.azureedge.net/main/whisper/models/65147644a518d12f04e32d6f3b26facc3f8dd46e/tiny.pt",
+      "size_mb": 39,
+      "checksum": "65147644a518d12f04e32d6f3b26facc3f8dd46e",
+      "type": "whisper",
+      "language": "multilingual",
+      "quality": "basic",
+      "hardware_requirements": "minimal",
+      "recommended_for": ["low-end devices", "testing", "development"]
+    },
+    "whisper_small": {
+      "name": "Whisper Small",
+      "description": "Small Whisper model for Persian speech recognition (244MB)",
+      "url": "https://openaipublic.azureedge.net/main/whisper/models/ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e/small.pt",
+      "size_mb": 244,
+      "checksum": "ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e",
+      "type": "whisper",
+      "language": "multilingual",
+      "quality": "good",
+      "hardware_requirements": "low",
+      "recommended_for": ["budget systems", "real-time processing", "mobile devices"]
+    },
+    "whisper_medium": {
+      "name": "Whisper Medium",
+      "description": "Medium Whisper model for Persian speech recognition (769MB)",
+      "url": "https://openaipublic.azureedge.net/main/whisper/models/345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1/medium.pt",
+      "size_mb": 769,
+      "checksum": "345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1",
+      "type": "whisper",
+      "language": "multilingual",
+      "quality": "excellent",
+      "hardware_requirements": "medium",
+      "recommended_for": ["desktop systems", "production use", "balanced performance"]
+    },
+    "whisper_large_v3": {
+      "name": "Whisper Large v3",
+      "description": "Latest large Whisper model for Persian speech recognition (1550MB)",
+      "url": "https://openaipublic.azureedge.net/main/whisper/models/e5b1a55b89c1367dacf97e3e19bfd829a01529dbfdeefa8caeb59b3f1b81dadb/large-v3.pt",
+      "size_mb": 1550,
+      "checksum": "e5b1a55b89c1367dacf97e3e19bfd829a01529dbfdeefa8caeb59b3f1b81dadb",
+      "type": "whisper",
+      "language": "multilingual",
+      "quality": "premium",
+      "hardware_requirements": "high",
+      "recommended_for": ["high-end systems", "maximum accuracy", "professional use"]
+    },
+    "kamtera_female_vits": {
+      "name": "Kamtera Female VITS",
+      "description": "High-quality Persian female voice TTS model (120MB)",
+      "url": "https://huggingface.co/Kamtera/persian-tts-female-vits/resolve/main/checkpoint_88000.pth",
+      "config_url": "https://huggingface.co/Kamtera/persian-tts-female-vits/resolve/main/config.json",
+      "size_mb": 120,
+      "checksum": "",
+      "type": "tts_vits",
+      "language": "persian",
+      "voice": "female",
+      "quality": "premium",
+      "hardware_requirements": "medium",
+      "recommended_for": ["natural female voice", "Persian native speakers", "production TTS"]
+    },
+    "kamtera_male_vits": {
+      "name": "Kamtera Male VITS",
+      "description": "High-quality Persian male voice TTS model (120MB)",
+      "url": "https://huggingface.co/Kamtera/persian-tts-male-vits/resolve/main/best_model_91323.pth",
+      "config_url": "https://huggingface.co/Kamtera/persian-tts-male-vits/resolve/main/config.json",
+      "size_mb": 120,
+      "checksum": "",
+      "type": "tts_vits",
+      "language": "persian",
+      "voice": "male",
+      "quality": "premium",
+      "hardware_requirements": "medium",
+      "recommended_for": ["natural male voice", "Persian native speakers", "production TTS"]
+    },
+    "facebook_mms_persian": {
+      "name": "Facebook MMS Persian",
+      "description": "Facebook's Massively Multilingual Speech Persian TTS (180MB)",
+      "url": "https://huggingface.co/facebook/mms-tts-fas/resolve/main/pytorch_model.bin",
+      "config_url": "https://huggingface.co/facebook/mms-tts-fas/resolve/main/config.json",
+      "size_mb": 180,
+      "checksum": "",
+      "type": "tts_transformers",
+      "language": "persian",
+      "voice": "neutral",
+      "quality": "good",
+      "hardware_requirements": "medium",
+      "recommended_for": ["multilingual support", "research", "fallback TTS"]
+    },
+    "persian_sentence_transformers": {
+      "name": "Persian Sentence Transformers",
+      "description": "Persian sentence embeddings for semantic understanding (440MB)",
+      "url": "https://huggingface.co/HooshvareLab/bert-fa-base-uncased/resolve/main/pytorch_model.bin",
+      "config_url": "https://huggingface.co/HooshvareLab/bert-fa-base-uncased/resolve/main/config.json",
+      "size_mb": 440,
+      "checksum": "",
+      "type": "embeddings",
+      "language": "persian",
+      "quality": "excellent",
+      "hardware_requirements": "medium",
+      "recommended_for": ["semantic search", "intent understanding", "NLP tasks"]
+    }
+  },
+  "hardware_tiers": {
+    "high": {
+      "description": "High-end systems with 16GB+ RAM, 8+ CPU cores, GPU optional",
+      "recommended_models": [
+        "whisper_large_v3",
+        "kamtera_female_vits",
+        "persian_sentence_transformers"
+      ],
+      "total_size_mb": 2110,
+      "ram_requirement_gb": 16,
+      "cpu_cores_min": 8
+    },
+    "medium": {
+      "description": "Mid-range systems with 8GB+ RAM, 4+ CPU cores",
+      "recommended_models": [
+        "whisper_medium",
+        "facebook_mms_persian",
+        "persian_sentence_transformers"
+      ],
+      "total_size_mb": 1389,
+      "ram_requirement_gb": 8,
+      "cpu_cores_min": 4
+    },
+    "low": {
+      "description": "Budget systems with 4GB+ RAM, 2+ CPU cores",
+      "recommended_models": [
+        "whisper_small",
+        "facebook_mms_persian"
+      ],
+      "total_size_mb": 424,
+      "ram_requirement_gb": 4,
+      "cpu_cores_min": 2
+    }
+  },
+  "model_categories": {
+    "speech_to_text": {
+      "models": ["whisper_tiny", "whisper_small", "whisper_medium", "whisper_large_v3"],
+      "description": "Persian speech recognition models"
+    },
+    "text_to_speech": {
+      "models": ["kamtera_female_vits", "kamtera_male_vits", "facebook_mms_persian"],
+      "description": "Persian text-to-speech synthesis models"
+    },
+    "language_understanding": {
+      "models": ["persian_sentence_transformers"],
+      "description": "Persian language understanding and embedding models"
+    }
+  },
+  "download_mirrors": {
+    "primary": {
+      "openai_whisper": "https://openaipublic.azureedge.net/main/whisper/models/",
+      "huggingface": "https://huggingface.co/"
+    },
+    "fallback": {
+      "openai_whisper": "https://github.com/openai/whisper/raw/main/whisper/assets/",
+      "huggingface_mirror": "https://hf-mirror.com/"
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2024-12-30",
+    "total_models": 8,
+    "total_size_gb": 3.2,
+    "supported_languages": ["persian", "multilingual"],
+    "model_types": ["whisper", "tts_vits", "tts_transformers", "embeddings"]
+  }
+}

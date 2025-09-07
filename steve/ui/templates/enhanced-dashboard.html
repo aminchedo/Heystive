@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="دستیار صوتی فارسی استیو - رابط کاربری پیشرفته با مانیتورینگ عملکرد">
+    <title>استیو - داشبورد پیشرفته | Steve Enhanced Dashboard</title>
+    
+    <!-- Existing stylesheets (preserved) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Existing design system (preserved) -->
+    <link rel="stylesheet" href="/static/css/persian-design-system.css">
+    <link rel="stylesheet" href="/static/css/mobile-responsive.css">
+    
+    <!-- NEW: Enhanced features (safe addition) -->
+    <link rel="stylesheet" href="/static/css/enhanced-features.css">
+    
+    <style>
+        /* Enhanced dashboard specific styles */
+        .enhanced-dashboard {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Vazirmatn', var(--font-primary);
+            padding: 2rem;
+        }
+        
+        .dashboard-header-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 1.2rem;
+            color: #718096;
+            margin-bottom: 1.5rem;
+        }
+        
+        .status-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-badge.online {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-badge.monitoring {
+            background: #bee3f8;
+            color: #1e4a72;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .panel-title i {
+            color: #4299e1;
+        }
+        
+        @media (max-width: 768px) {
+            .enhanced-dashboard {
+                padding: 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .dashboard-header-enhanced {
+                padding: 1.5rem;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="enhanced-dashboard">
+        <!-- Enhanced Header -->
+        <header class="dashboard-header-enhanced">
+            <h1 class="dashboard-title">
+                <i class="fas fa-microphone-alt"></i>
+                دستیار صوتی استیو
+            </h1>
+            <p class="dashboard-subtitle">
+                Steve Persian Voice Assistant - Enhanced Dashboard
+            </p>
+            <div class="status-badges">
+                <div class="status-badge online">
+                    <i class="fas fa-circle"></i>
+                    سیستم آنلاین
+                </div>
+                <div class="status-badge monitoring">
+                    <i class="fas fa-chart-line"></i>
+                    مانیتورینگ فعال
+                </div>
+            </div>
+        </header>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Voice Control Panel -->
+            <div class="dashboard-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-voice"></i>
+                    کنترل صوتی
+                </h2>
+                
+                <!-- Voice Control Buttons -->
+                <div class="enhanced-controls">
+                    <button class="control-button-enhanced" id="start-listening">
+                        <i class="fas fa-microphone"></i>
+                        شروع گوش دادن
+                    </button>
+                    <button class="control-button-enhanced" id="stop-listening">
+                        <i class="fas fa-microphone-slash"></i>
+                        توقف گوش دادن
+                    </button>
+                    <button class="control-button-enhanced" id="test-tts">
+                        <i class="fas fa-volume-up"></i>
+                        تست TTS
+                    </button>
+                    <button class="control-button-enhanced" id="test-stt">
+                        <i class="fas fa-waveform-lines"></i>
+                        تست STT
+                    </button>
+                </div>
+                
+                <!-- Voice Status -->
+                <div class="health-status">
+                    <h4>وضعیت سیستم صوتی</h4>
+                    <div class="health-status">
+                        <span class="health-indicator healthy" id="mic-status"></span>
+                        <span>میکروفون</span>
+                    </div>
+                    <div class="health-status">
+                        <span class="health-indicator healthy" id="speaker-status"></span>
+                        <span>بلندگو</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Information Panel -->
+            <div class="dashboard-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-info-circle"></i>
+                    اطلاعات سیستم
+                </h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="uptime">0h 0m</div>
+                        <div class="metric-label">زمان فعالیت</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="requests">0</div>
+                        <div class="metric-label">درخواست‌ها</div>
+                    </div>
+                </div>
+                
+                <!-- System Health -->
+                <div class="health-status">
+                    <h4>سلامت سیستم</h4>
+                    <div id="system-health-indicators">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Monitoring Panel (will be added by JavaScript) -->
+        <div id="monitoring-container"></div>
+        
+        <!-- Audio Visualizer Panel (will be added by JavaScript) -->
+        <div id="visualizer-container"></div>
+        
+        <!-- Settings Panel (will be added by JavaScript) -->
+        <div id="settings-container"></div>
+        
+        <!-- Log Viewer -->
+        <div class="dashboard-panel">
+            <h2 class="panel-title">
+                <i class="fas fa-terminal"></i>
+                لاگ سیستم
+            </h2>
+            <div class="log-viewer-enhanced" id="log-viewer">
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-12-30 12:00:00</span>
+                    <span class="log-level info">INFO</span>
+                    <span>Enhanced dashboard loaded successfully</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-12-30 12:00:01</span>
+                    <span class="log-level info">INFO</span>
+                    <span>Performance monitoring started</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">2024-12-30 12:00:02</span>
+                    <span class="log-level info">INFO</span>
+                    <span>Audio visualizer initialized</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Existing scripts (preserved) -->
+    <script src="/static/js/steve-professional-integration.js"></script>
+    <script src="/static/js/voice-visualizer.js"></script>
+    <script src="/static/js/accessibility-manager.js"></script>
+    <script src="/static/js/error-handler.js"></script>
+    
+    <!-- NEW: Enhanced dashboard functionality (safe addition) -->
+    <script src="/static/js/enhanced-dashboard.js"></script>
+    
+    <script>
+        // Enhanced dashboard initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Enhanced dashboard page loaded');
+            
+            // Initialize voice control buttons
+            initializeVoiceControls();
+            
+            // Start system status updates
+            startSystemStatusUpdates();
+            
+            // Initialize keyboard shortcuts
+            initializeKeyboardShortcuts();
+        });
+        
+        function initializeVoiceControls() {
+            const buttons = {
+                'start-listening': () => startListening(),
+                'stop-listening': () => stopListening(),
+                'test-tts': () => testTTS(),
+                'test-stt': () => testSTT()
+            };
+            
+            Object.entries(buttons).forEach(([id, handler]) => {
+                const button = document.getElementById(id);
+                if (button) {
+                    button.addEventListener('click', handler);
+                }
+            });
+        }
+        
+        function startListening() {
+            console.log('Starting voice listening...');
+            updateMicrophoneStatus('active');
+            showNotification('شروع گوش دادن', 'success');
+        }
+        
+        function stopListening() {
+            console.log('Stopping voice listening...');
+            updateMicrophoneStatus('inactive');
+            showNotification('توقف گوش دادن', 'info');
+        }
+        
+        function testTTS() {
+            console.log('Testing TTS...');
+            showNotification('تست سیستم TTS', 'info');
+            
+            // Simulate TTS test
+            fetch('/api/tts/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'سلام، من استیو هستم' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('تست TTS موفق', 'success');
+                } else {
+                    showNotification('تست TTS ناموفق', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('TTS test error:', error);
+                showNotification('خطا در تست TTS', 'error');
+            });
+        }
+        
+        function testSTT() {
+            console.log('Testing STT...');
+            showNotification('تست سیستم STT', 'info');
+            
+            // Simulate STT test
+            fetch('/api/stt/test', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('تست STT موفق', 'success');
+                } else {
+                    showNotification('تست STT ناموفق', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('STT test error:', error);
+                showNotification('خطا در تست STT', 'error');
+            });
+        }
+        
+        function updateMicrophoneStatus(status) {
+            const micStatus = document.getElementById('mic-status');
+            if (micStatus) {
+                micStatus.className = `health-indicator ${status === 'active' ? 'healthy' : 'unknown'}`;
+            }
+        }
+        
+        function startSystemStatusUpdates() {
+            // Update system status every 5 seconds
+            setInterval(updateSystemStatus, 5000);
+            updateSystemStatus(); // Initial update
+        }
+        
+        function updateSystemStatus() {
+            fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                updateSystemMetrics(data);
+                updateHealthIndicators(data);
+            })
+            .catch(error => {
+                console.error('Status update error:', error);
+            });
+        }
+        
+        function updateSystemMetrics(data) {
+            // Update uptime
+            const uptimeElement = document.getElementById('uptime');
+            if (uptimeElement && data.uptime) {
+                const hours = Math.floor(data.uptime / 3600);
+                const minutes = Math.floor((data.uptime % 3600) / 60);
+                uptimeElement.textContent = `${hours}h ${minutes}m`;
+            }
+            
+            // Update request count
+            const requestsElement = document.getElementById('requests');
+            if (requestsElement && data.requests) {
+                requestsElement.textContent = data.requests;
+            }
+        }
+        
+        function updateHealthIndicators(data) {
+            const indicators = ['mic-status', 'speaker-status'];
+            indicators.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    // Mock health status based on data
+                    const status = data.audio_available ? 'healthy' : 'unhealthy';
+                    element.className = `health-indicator ${status}`;
+                }
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            if (window.enhancedDashboard) {
+                window.enhancedDashboard.showNotification(message, type);
+            } else {
+                console.log(`${type.toUpperCase()}: ${message}`);
+            }
+        }
+        
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl + L: Start/Stop Listening
+                if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    // Toggle listening state
+                    const isListening = document.getElementById('start-listening').classList.contains('active');
+                    if (isListening) {
+                        stopListening();
+                    } else {
+                        startListening();
+                    }
+                }
+                
+                // Ctrl + T: Test TTS
+                if (e.ctrlKey && e.key === 't') {
+                    e.preventDefault();
+                    testTTS();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

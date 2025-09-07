@@ -173,6 +173,7 @@ class PersianTTSEngine:
             import subprocess
             
             # Check if espeak is available
+            # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
             result = subprocess.run(['espeak', '--version'], 
                                   capture_output=True, text=True, timeout=5)
             
@@ -333,7 +334,9 @@ class PersianTTSEngine:
             # Clean up temporary file
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception as e:
+                # NEW: Add logging to silent failure but keep same behavior
+                logger.debug(f"Temp file cleanup failed (non-critical): {e}")
                 pass
             
             # Encode to base64
@@ -384,7 +387,9 @@ class PersianTTSEngine:
             # Clean up temporary file
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception as e:
+                # NEW: Add logging to silent failure but keep same behavior
+                logger.debug(f"Temp file cleanup failed (non-critical): {e}")
                 pass
             
             # Encode to base64
@@ -424,6 +429,7 @@ class PersianTTSEngine:
                 text
             ]
             
+            # TODO: Consider migrating to SecureSubprocess.safe_run_async() for enhanced security
             result = await asyncio.to_thread(
                 subprocess.run, cmd, capture_output=True, text=True, timeout=10
             )
@@ -448,7 +454,9 @@ class PersianTTSEngine:
             # Clean up temporary file
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception as e:
+                # NEW: Add logging to silent failure but keep same behavior
+                logger.debug(f"Temp file cleanup failed (non-critical): {e}")
                 pass
             
             # Encode to base64
@@ -522,7 +530,9 @@ class PersianTTSEngine:
             # Clean up temporary file
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception as e:
+                # NEW: Add logging to silent failure but keep same behavior
+                logger.debug(f"Temp file cleanup failed (non-critical): {e}")
                 pass
             
             # Encode to base64
@@ -639,7 +649,9 @@ class PersianTTSEngine:
                 if engine_info['type'] == 'pyttsx3':
                     try:
                         engine_info['engine'].stop()
-                    except:
+                    except Exception as e:
+                        # NEW: Add logging to silent failure but keep same behavior
+                        logger.debug(f"Engine stop failed (non-critical): {e}")
                         pass
             
             self.engines.clear()

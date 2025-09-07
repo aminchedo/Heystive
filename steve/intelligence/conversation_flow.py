@@ -458,7 +458,9 @@ class PersianConversationFlow:
                 # This would get actual device states
                 # For now, we'll use a placeholder
                 self.conversation_context["device_states"] = {}
-            except:
+            except Exception as e:
+                # NEW: Add logging to silent failure but keep same behavior
+                logger.debug(f"Device state update failed (non-critical): {e}")
                 pass
     
     def _get_current_context(self) -> Dict[str, Any]:

@@ -1,0 +1,476 @@
+/*
+ * ENHANCED FEATURES CSS
+ * Additional enhancements for Steve Voice Assistant Web Interface
+ * SAFE ADDITIONS - Does not modify existing styles
+ */
+
+/* ========================================
+   ENHANCED MONITORING DASHBOARD
+   ======================================== */
+
+.monitoring-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.monitoring-panel h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.monitoring-panel h3 i {
+    color: #4299e1;
+}
+
+/* Performance Metrics Cards */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.metric-card:hover::before {
+    left: 100%;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.metric-trend {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.metric-trend.up {
+    color: #48bb78;
+}
+
+.metric-trend.down {
+    color: #f56565;
+}
+
+/* Health Status Indicators */
+.health-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.health-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.health-indicator.healthy {
+    background-color: #48bb78;
+}
+
+.health-indicator.degraded {
+    background-color: #ed8936;
+}
+
+.health-indicator.unhealthy {
+    background-color: #f56565;
+}
+
+.health-indicator.unknown {
+    background-color: #a0aec0;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Real-time Charts */
+.chart-container {
+    position: relative;
+    height: 200px;
+    margin: 1rem 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #718096;
+    font-style: italic;
+}
+
+/* Enhanced Audio Visualizer */
+.audio-visualizer-enhanced {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.visualizer-bars {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    height: 100px;
+    gap: 2px;
+}
+
+.visualizer-bar {
+    width: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 2px;
+    transition: height 0.1s ease;
+    animation: visualizer-pulse 1s infinite alternate;
+}
+
+@keyframes visualizer-pulse {
+    0% { height: 10px; }
+    100% { height: var(--bar-height, 20px); }
+}
+
+/* Enhanced Control Buttons */
+.enhanced-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.control-button-enhanced {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.control-button-enhanced:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-button-enhanced:active {
+    transform: translateY(0);
+}
+
+.control-button-enhanced.active {
+    background: rgba(72, 187, 120, 0.3);
+    border-color: #48bb78;
+}
+
+/* Log Viewer Enhancement */
+.log-viewer-enhanced {
+    background: #1a202c;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 1rem 0;
+    border: 1px solid #2d3748;
+}
+
+.log-entry {
+    margin: 0.25rem 0;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    color: #a0aec0;
+    margin-right: 0.5rem;
+}
+
+.log-level {
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.log-level.info {
+    background: #3182ce;
+    color: white;
+}
+
+.log-level.warning {
+    background: #d69e2e;
+    color: white;
+}
+
+.log-level.error {
+    background: #e53e3e;
+    color: white;
+}
+
+.log-level.debug {
+    background: #805ad5;
+    color: white;
+}
+
+/* Settings Panel Enhancement */
+.settings-panel-enhanced {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section h4 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.setting-description {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-top: 0.25rem;
+}
+
+.setting-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #cbd5e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.toggle-switch.active {
+    background: #48bb78;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.toggle-switch.active::after {
+    transform: translateX(26px);
+}
+
+/* Enhanced Notifications */
+.notification-enhanced {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #48bb78;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification-enhanced.show {
+    transform: translateX(0);
+}
+
+.notification-enhanced.error {
+    border-left-color: #f56565;
+}
+
+.notification-enhanced.warning {
+    border-left-color: #ed8936;
+}
+
+.notification-enhanced.info {
+    border-left-color: #4299e1;
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .enhanced-controls {
+        justify-content: center;
+    }
+    
+    .control-button-enhanced {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+    
+    .monitoring-panel {
+        padding: 1rem;
+    }
+    
+    .settings-panel-enhanced {
+        padding: 1rem;
+    }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+    .monitoring-panel,
+    .settings-panel-enhanced {
+        background: rgba(45, 55, 72, 0.95);
+        color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .monitoring-panel h3,
+    .settings-section h4 {
+        color: #e2e8f0;
+    }
+    
+    .setting-label {
+        color: #cbd5e0;
+    }
+    
+    .setting-description {
+        color: #a0aec0;
+    }
+    
+    .setting-item {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+    .metric-card::before,
+    .visualizer-bar,
+    .health-indicator,
+    .control-button-enhanced,
+    .toggle-switch,
+    .toggle-switch::after,
+    .notification-enhanced {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .monitoring-panel,
+    .settings-panel-enhanced {
+        border: 2px solid #000;
+        background: #fff;
+        color: #000;
+    }
+    
+    .metric-card {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .control-button-enhanced {
+        border: 2px solid #000;
+        background: #fff;
+        color: #000;
+    }
+}

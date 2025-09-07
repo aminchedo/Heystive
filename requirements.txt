@@ -4,7 +4,7 @@
 # Audio Processing - Core
 pyaudio==0.2.11
 librosa==0.10.1
-soundfile==0.12.1  # Fixed: Using single version compatible with all components
+soundfile==0.13.1  # RESOLVED: Using newer version 0.13.1 (enhanced branch) for better compatibility
 webrtcvad==2.0.10
 pydub==0.25.1
 
@@ -24,7 +24,7 @@ pygame==2.6.1
 PyYAML==6.0.1
 
 # Audio Processing Support - Fixed versions
-numpy==1.24.3  # Fixed: Using compatible version with torch and librosa
+numpy==1.24.3  # RESOLVED: Using stable version compatible with torch and librosa (from both branches)
 scipy==1.11.4
 CFFI==1.17.1
 
@@ -67,7 +67,7 @@ mcp==0.1.0
 
 # Data Storage
 duckdb==0.9.2
-# sqlite3 is built-in to Python
+# sqlite3 is built-in to Python - no need to include
 
 # Utilities
 requests==2.31.0

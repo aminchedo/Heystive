@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار صوتی فارسی - استیو</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Vazir', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-interface {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .voice-control {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .voice-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+        }
+
+        .voice-button.listening {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-button.processing {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .voice-button i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .status-text {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .test-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .test-btn.primary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .test-btn.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .test-btn.warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .demo-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .chat-demo {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 200px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #2196F3;
+            color: white;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .assistant-message {
+            background: #e0e0e0;
+            color: #333;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .command-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .system-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        .github-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .github-link a {
+            color: #333;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .main-interface {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .voice-button {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .test-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="github-link">
+        <a href="#" title="GitHub Repository">
+            <i class="fab fa-github"></i>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎤 دستیار صوتی فارسی - استیو</h1>
+            <p>Voice Assistant Demo & Testing Interface</p>
+        </div>
+
+        <div class="main-interface">
+            <div class="voice-control">
+                <button class="voice-button" id="voiceButton" onclick="toggleVoice()">
+                    <i class="fas fa-microphone" id="voiceIcon"></i>
+                </button>
+                <div class="status-text" id="statusText">برای شروع روی میکروفون کلیک کنید</div>
+                
+                <div class="test-buttons">
+                    <button class="test-btn primary" onclick="testTTS()">
+                        <i class="fas fa-volume-up"></i> تست صحبت کردن
+                    </button>
+                    <button class="test-btn success" onclick="testWakeWord()">
+                        <i class="fas fa-play"></i> تست "هی استیو"
+                    </button>
+                    <button class="test-btn warning" onclick="testResponse()">
+                        <i class="fas fa-comment"></i> تست پاسخ
+                    </button>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-microphone-alt"></i>
+                    <h3>تشخیص گفتار فارسی</h3>
+                    <p>تبدیل گفتار فارسی به متن با دقت بالا و سرعت مناسب</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>هوش مصنوعی پیشرفته</h3>
+                    <p>پاسخ‌دهی هوشمند به سوالات و درخواست‌های کاربر</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-home"></i>
+                    <h3>کنترل خانه هوشمند</h3>
+                    <p>کنترل دستگاه‌های خانه هوشمند با فرمان‌های صوتی</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>حفظ حریم خصوصی</h3>
+                    <p>پردازش محلی داده‌ها بدون ارسال به سرورهای خارجی</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>🗣️ آزمایش فرمان‌های صوتی</h3>
+            <input type="text" class="command-input" id="commandInput" 
+                   placeholder="فرمان خود را تایپ کنید یا از میکروفون استفاده کنید...">
+            
+            <div class="chat-demo" id="chatDemo">
+                <div class="chat-message assistant-message">
+                    سلام! من استیو هستم. چطور می‌تونم کمکتون کنم؟
+                </div>
+            </div>
+
+            <div class="test-buttons">
+                <button class="test-btn primary" onclick="sendTestCommand('سلام استیو')">
+                    سلام استیو
+                </button>
+                <button class="test-btn success" onclick="sendTestCommand('چراغ را روشن کن')">
+                    چراغ را روشن کن
+                </button>
+                <button class="test-btn warning" onclick="sendTestCommand('ساعت چنده؟')">
+                    ساعت چنده؟
+                </button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📊 وضعیت سیستم</h3>
+            <div class="system-status">
+                <div class="status-item status-ready" id="ttsStatus">
+                    <strong>Text-to-Speech</strong><br>
+                    <span>آماده</span>
+                </div>
+                <div class="status-item status-ready" id="sttStatus">
+                    <strong>Speech-to-Text</strong><br>
+                    <span>آماده</span>
+                </div>
+                <div class="status-item status-ready" id="wakeWordStatus">
+                    <strong>Wake Word</strong><br>
+                    <span>آماده</span>
+                </div>
+                <div class="status-item status-ready" id="smartHomeStatus">
+                    <strong>Smart Home</strong><br>
+                    <span>متصل</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>دستیار صوتی فارسی - استیو | ساخته شده با ❤️ برای جامعه فارسی‌زبان</p>
+        <p>Persian Voice Assistant - Open Source & Privacy-First</p>
+    </div>
+
+    <script>
+        let isListening = false;
+        let recognition = null;
+        let synthesis = window.speechSynthesis;
+
+        // Initialize Speech Recognition if available
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fa-IR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                console.log('Speech recognition started');
+            };
+
+            recognition.onresult = function(event) {
+                const command = event.results[0][0].transcript;
+                console.log('Recognized:', command);
+                processVoiceCommand(command);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                resetVoiceButton();
+                updateStatus('خطا در تشخیص گفتار. دوباره تلاش کنید.');
+            };
+
+            recognition.onend = function() {
+                resetVoiceButton();
+            };
+        }
+
+        function toggleVoice() {
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            
+            if (!isListening) {
+                if (recognition) {
+                    startListening();
+                } else {
+                    alert('مرورگر شما از تشخیص گفتار پشتیبانی نمی‌کند');
+                }
+            } else {
+                stopListening();
+            }
+        }
+
+        function startListening() {
+            isListening = true;
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            
+            button.classList.add('listening');
+            icon.className = 'fas fa-stop';
+            updateStatus('در حال شنیدن... صحبت کنید');
+            
+            if (recognition) {
+                recognition.start();
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            if (recognition) {
+                recognition.stop();
+            }
+            resetVoiceButton();
+        }
+
+        function resetVoiceButton() {
+            isListening = false;
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            
+            button.classList.remove('listening', 'processing');
+            icon.className = 'fas fa-microphone';
+            updateStatus('برای شروع روی میکروفون کلیک کنید');
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusText').textContent = message;
+        }
+
+        function processVoiceCommand(command) {
+            const button = document.getElementById('voiceButton');
+            button.classList.remove('listening');
+            button.classList.add('processing');
+            document.getElementById('voiceIcon').className = 'fas fa-cog';
+            
+            updateStatus('در حال پردازش...');
+            addChatMessage(command, 'user');
+            
+            // Simulate processing time
+            setTimeout(() => {
+                const response = generateResponse(command);
+                addChatMessage(response, 'assistant');
+                speakText(response);
+                resetVoiceButton();
+            }, 1500);
+        }
+
+        function generateResponse(command) {
+            const responses = {
+                'سلام': 'سلام! چطور می‌تونم کمکتون کنم؟',
+                'هی استیو': 'بله سرورم، در خدمتم',
+                'چراغ': 'چراغ روشن شد',
+                'ساعت': `ساعت ${new Date().toLocaleTimeString('fa-IR')} است`,
+                'هوا': 'هوا امروز آفتابی و خوب است',
+                'موسیقی': 'پخش موسیقی آغاز شد',
+                'خبر': 'آخرین اخبار را از منابع معتبر دریافت می‌کنم'
+            };
+
+            for (let key in responses) {
+                if (command.includes(key)) {
+                    return responses[key];
+                }
+            }
+
+            return 'متوجه نشدم. می‌تونید دوباره بفرمایید؟';
+        }
+
+        function addChatMessage(message, sender) {
+            const chatDemo = document.getElementById('chatDemo');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+            messageDiv.textContent = message;
+            chatDemo.appendChild(messageDiv);
+            chatDemo.scrollTop = chatDemo.scrollHeight;
+        }
+
+        function speakText(text) {
+            if (synthesis) {
+                // Cancel any ongoing speech
+                synthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fa-IR';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+                
+                // Add visual feedback during speech
+                utterance.onstart = function() {
+                    updateStatus('در حال صحبت...');
+                };
+                
+                utterance.onend = function() {
+                    updateStatus('آماده برای درخواست بعدی');
+                    setTimeout(() => {
+                        updateStatus('برای شروع روی میکروفون کلیک کنید');
+                    }, 2000);
+                };
+                
+                synthesis.speak(utterance);
+            }
+        }
+
+        function testTTS() {
+            const testTexts = [
+                'سلام! من استیو هستم، دستیار صوتی فارسی شما',
+                'صدای من چطوره؟ امیدوارم خوب باشه!',
+                'تست سیستم تولید گفتار با موفقیت انجام شد'
+            ];
+            
+            const randomText = testTexts[Math.floor(Math.random() * testTexts.length)];
+            speakText(randomText);
+            updateStatus('تست صحبت کردن انجام شد');
+            
+            // Visual feedback
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> در حال صحبت...`;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 3000);
+        }
+
+        function testWakeWord() {
+            const wakeResponse = 'بله سرورم، در خدمتم. چه کاری انجام بدم؟';
+            addChatMessage('هی استیو', 'user');
+            
+            setTimeout(() => {
+                addChatMessage(wakeResponse, 'assistant');
+                speakText(wakeResponse);
+                
+                // Show some example commands
+                setTimeout(() => {
+                    addChatMessage('مثلاً می‌تونید بگید: چراغ را روشن کن، ساعت چنده، یا هوا چطوره', 'assistant');
+                }, 2000);
+            }, 800);
+        }
+
+        function testResponse() {
+            const responses = [
+                'چطور می‌تونم کمکتون کنم؟',
+                'در خدمت شما هستم',
+                'سوال دیگه‌ای دارید؟',
+                'آماده‌ام برای پاسخگویی',
+                'چه کار خاصی براتون انجام بدم؟'
+            ];
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            addChatMessage(randomResponse, 'assistant');
+            speakText(randomResponse);
+        }
+
+        function sendTestCommand(command) {
+            // Add slight delay for better UX
+            updateStatus('در حال پردازش فرمان...');
+            setTimeout(() => {
+                processVoiceCommand(command);
+            }, 500);
+        }
+
+        function startListening() {
+            isListening = true;
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            
+            button.classList.add('listening');
+            
+            // Change icon to stop
+            icon.innerHTML = `<path d="M6 6h12v12H6z"/>`;
+            
+            updateStatus('در حال شنیدن... صحبت کنید');
+            
+            if (recognition) {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Recognition start error:', error);
+                    updateStatus('خطا در شروع تشخیص گفتار');
+                    resetVoiceButton();
+                }
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            if (recognition) {
+                recognition.stop();
+            }
+            resetVoiceButton();
+        }
+
+        // Enhanced event listeners
+        document.getElementById('commandInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value.trim();
+                if (command) {
+                    processVoiceCommand(command);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Add some keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ' && e.ctrlKey) { // Ctrl + Space to toggle voice
+                e.preventDefault();
+                toggleVoice();
+            }
+        });
+
+        // Initialize demo with enhanced setup
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('سیستم آماده است - Ctrl+Space برای شروع سریع');
+            
+            // Enhanced browser capability checking
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                const sttElement = document.getElementById('sttStatus');
+                sttElement.className = 'status-item status-error';
+                sttElement.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <strong>Speech-to-Text</strong><br>
+                    <span>پشتیبانی نمی‌شود</span>
+                `;
+            }
+            
+            if (!window.speechSynthesis) {
+                const ttsElement = document.getElementById('ttsStatus');
+                ttsElement.className = 'status-item status-error';
+                ttsElement.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <strong>Text-to-Speech</strong><br>
+                    <span>پشتیبانی نمی‌شود</span>
+                `;
+            }
+            
+            // Welcome message
+            setTimeout(() => {
+                addChatMessage('سلام! من آماده‌ام. چیزی که می‌خواهید بپرسید؟', 'assistant');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
