@@ -1,0 +1,59 @@
+- workspace
+- - archive
+- - - 20250907_181853
+- - - - backup_before_changes
+- - - - - archive
+- - - - - - 20250907_181853
+- - - - - - - backup_before_changes
+- - - - - heystive
+- - - - - heystive_audio_output
+- - - - - - config
+- - - - - - integration
+- - - - - - ui
+- - - - - - voice
+- - - - - steve
+- - - - - - core
+- - - - - - intelligence
+- - - - - - models
+- - - - - - smart_home
+- - - - - - ui
+- - - - - - - static
+- - - - - - - - css
+- - - - - - - - js
+- - - - - - - templates
+- - - - - - utils
+- - - - - templates
+- - - - - tests
+- - - requirements_versions
+- - config
+- - docs_enhanced
+- - enhancements
+- - - integrations
+- - - modern_gui
+- - - tools
+- - heystive
+- - Heystive
+- - heystive_audio_output
+- - - config
+- - - integration
+- - - ui
+- - - voice
+- - scripts
+- - steve
+- - - core
+- - - intelligence
+- - - models
+- - - security
+- - - smart_home
+- - - ui
+- - - - static
+- - - - - css
+- - - - - js
+- - - - templates
+- - - utils
+- - templates
+- - tests
+- - tests_enhanced
+- - - fixtures
+- - - integration
+- - - unit
