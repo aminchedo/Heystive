@@ -34,7 +34,10 @@ class MultiTTSManager:
         # ENGINE 3: Google TTS (Online - Natural)
         self._init_google_tts()
         
-        # ENGINE 4: Azure TTS (Online - Premium)
+        # ENGINE 4: eSpeak Direct (Simple Offline)
+        self._init_espeak_direct()
+        
+        # ENGINE 5: Azure TTS (Online - Premium)
         self._init_azure_tts()
         
         print(f"\n✅ Initialized {len(self.available_engines)} TTS engines")
@@ -166,6 +169,39 @@ class MultiTTSManager:
         except Exception as e:
             print(f"❌ Google TTS: Failed - {e}")
     
+    def _init_espeak_direct(self):
+        """Initialize direct eSpeak engine"""
+        try:
+            import subprocess
+            
+            # Test eSpeak directly
+            test_text = "eSpeak TTS engine test"
+            test_file = f"{self.output_dir}/test_espeak.wav"
+            
+            # Try eSpeak command
+            cmd = ["espeak", "-w", test_file, "-s", "150", test_text]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and os.path.exists(test_file) and os.path.getsize(test_file) > 0:
+                self.available_engines['espeak'] = {
+                    'engine': 'espeak',
+                    'name': 'eSpeak (Direct)',
+                    'quality': 'Basic',
+                    'speed': 'Very Fast',
+                    'offline': True,
+                    'status': 'Working'
+                }
+                print("✅ eSpeak: Initialized and tested")
+            else:
+                print(f"❌ eSpeak: Test failed - {result.stderr}")
+                
+        except subprocess.TimeoutExpired:
+            print("❌ eSpeak: Timeout during test")
+        except FileNotFoundError:
+            print("⚠️ eSpeak: Not installed (apt install espeak)")
+        except Exception as e:
+            print(f"❌ eSpeak: Failed - {e}")
+    
     def _init_azure_tts(self):
         """Initialize Azure TTS"""
         try:
@@ -196,8 +232,8 @@ class MultiTTSManager:
     def _auto_select_best_engine(self):
         """Auto-select the best available engine"""
         
-        # Priority order: Coqui > pyttsx3 > Google TTS
-        priority_order = ['coqui', 'pyttsx3', 'gtts']
+        # Priority order: Coqui > eSpeak > pyttsx3 > Google TTS
+        priority_order = ['coqui', 'espeak', 'pyttsx3', 'gtts']
         
         for engine_name in priority_order:
             if engine_name in self.available_engines:
@@ -251,6 +287,9 @@ class MultiTTSManager:
             
             elif self.current_engine == 'gtts':
                 return self._speak_gtts(text, output_file)
+            
+            elif self.current_engine == 'espeak':
+                return self._speak_espeak(text, output_file)
             
         except Exception as e:
             print(f"❌ TTS Error ({self.current_engine}): {e}")
@@ -318,6 +357,29 @@ class MultiTTSManager:
             print(f"📁 Audio saved to: {output_file} (no audio device for playback)")
         
         return True
+    
+    def _speak_espeak(self, text, output_file):
+        """Speak with direct eSpeak"""
+        import subprocess
+        
+        if not output_file:
+            output_file = f"{self.output_dir}/temp_espeak.wav"
+        
+        try:
+            # Use eSpeak directly
+            cmd = ["espeak", "-w", output_file, "-s", "150", text]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and os.path.exists(output_file):
+                print(f"📁 Audio saved to: {output_file}")
+                return True
+            else:
+                print(f"❌ eSpeak error: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ eSpeak failed: {e}")
+            return False
     
     def test_all_engines(self):
         """Test all available engines with the same text"""

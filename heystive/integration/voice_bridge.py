@@ -15,7 +15,7 @@ import importlib.util
 # Add workspace to path
 sys.path.insert(0, '/workspace')
 
-from heystive.voice.persian_tts import PersianVoiceEngine
+from heystive.voice.multi_tts_manager import MultiTTSManager
 from heystive.voice.persian_stt import PersianSpeechRecognizer
 
 class HeystiveVoiceBridge:
@@ -29,13 +29,28 @@ class HeystiveVoiceBridge:
         
         # Initialize voice components
         print("🔧 Setting up voice components...")
-        self.tts = PersianVoiceEngine()
+        self.tts_manager = MultiTTSManager()
         self.stt = PersianSpeechRecognizer()
         
         # Try to import and preserve existing Heystive modules
         self.existing_heystive = self._discover_existing_modules()
         
         print("✅ Heystive Voice Bridge initialized successfully!")
+    
+    def change_voice_engine(self, engine_name):
+        """Allow user to change TTS engine"""
+        return self.tts_manager.switch_engine(engine_name)
+    
+    def list_voice_options(self):
+        """Show available voice engines to user"""
+        return self.tts_manager.list_available_engines()
+    
+    def get_current_voice_engine(self):
+        """Get currently selected voice engine info"""
+        if self.tts_manager.current_engine:
+            current = self.tts_manager.current_engine
+            return self.tts_manager.available_engines[current]
+        return None
     
     def _discover_existing_modules(self):
         """Find and preserve existing Heystive functionality."""
@@ -221,7 +236,7 @@ class HeystiveVoiceBridge:
                 if any(exit_word in user_input.lower() for exit_word in ['exit', 'خداحافظ', 'خدافظ', 'goodbye']):
                     response = "خداحافظ! امیدوارم تجربه خوبی با استیو داشته باشید."
                     print(f"🤖 پاسخ: {response}")
-                    self.tts.speak_immediately(response)
+                    self.tts_manager.speak_with_current_engine(response, f"heystive_audio_output/goodbye.wav")
                     break
                 
                 # Process command
@@ -231,7 +246,8 @@ class HeystiveVoiceBridge:
                 print(f"🤖 پاسخ: {response}")
                 
                 # Actually generate speech
-                success = self.tts.speak_immediately(response)
+                audio_file = f"heystive_audio_output/response_{interaction_count}.wav"
+                success = self.tts_manager.speak_with_current_engine(response, audio_file)
                 if success:
                     print("   ✅ پاسخ صوتی تولید شد")
                 else:
@@ -243,7 +259,7 @@ class HeystiveVoiceBridge:
             except Exception as e:
                 print(f"❌ خطا: {e}")
                 error_response = "متاسفم، خطایی رخ داد"
-                self.tts.speak_immediately(error_response)
+                self.tts_manager.speak_with_current_engine(error_response, "heystive_audio_output/error.wav")
     
     def test_complete_integration(self):
         """Test the complete voice integration."""
@@ -259,14 +275,19 @@ class HeystiveVoiceBridge:
         }
         
         # Test 1: TTS functionality
-        print("🔊 Test 1: Text-to-Speech")
+        print("🔊 Test 1: Multi-TTS System")
         try:
-            test_text = "این یک تست کامل سیستم صوتی استیو است"
-            success = self.tts.speak_immediately(test_text)
+            test_text = "این یک تست کامل سیستم صوتی چندگانه استیو است"
+            test_file = "heystive_audio_output/integration_test.wav"
+            success = self.tts_manager.speak_with_current_engine(test_text, test_file)
             test_results["tts_working"] = success
-            print(f"   {'✅' if success else '❌'} TTS: {'WORKING' if success else 'FAILED'}")
+            print(f"   {'✅' if success else '❌'} Multi-TTS: {'WORKING' if success else 'FAILED'}")
+            if success:
+                current_engine = self.tts_manager.current_engine
+                engine_name = self.tts_manager.available_engines[current_engine]['name']
+                print(f"      Using: {engine_name}")
         except Exception as e:
-            print(f"   ❌ TTS Error: {e}")
+            print(f"   ❌ Multi-TTS Error: {e}")
         
         # Test 2: STT functionality
         print("\n🎤 Test 2: Speech-to-Text")
@@ -296,7 +317,8 @@ class HeystiveVoiceBridge:
         try:
             test_command = "ساعت چنده؟"
             response = self.process_voice_command(test_command)
-            voice_success = self.tts.speak_immediately(response)
+            test_file = "heystive_audio_output/response_test.wav"
+            voice_success = self.tts_manager.speak_with_current_engine(response, test_file)
             test_results["voice_responses"] = voice_success
             print(f"   {'✅' if voice_success else '❌'} Voice Responses: {'WORKING' if voice_success else 'FAILED'}")
         except Exception as e:
