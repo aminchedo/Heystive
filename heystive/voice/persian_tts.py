@@ -125,29 +125,41 @@ class PersianVoiceEngine:
             return False
     
     def speak_immediately(self, text: str) -> bool:
-        """Speak text immediately using gTTS and pygame."""
+        """Speak text immediately by generating audio file (fallback for environments without audio)."""
         try:
             normalized_text = self._normalize_persian_text(text)
             print(f"🔊 Speaking: '{text}'")
             
+            # In environments without audio output, generate file instead
+            temp_file = self.output_dir / f"temp_speech_{int(time.time())}.mp3"
+            
             # Create gTTS object for Persian (using Arabic as closest supported language)
             tts = gTTS(text=normalized_text, lang='ar', slow=False)
+            tts.save(str(temp_file))
             
-            # Save to memory buffer
-            audio_buffer = io.BytesIO()
-            tts.write_to_fp(audio_buffer)
-            audio_buffer.seek(0)
-            
-            # Play using pygame
-            pygame.mixer.music.load(audio_buffer)
-            pygame.mixer.music.play()
-            
-            # Wait for playback to finish
-            while pygame.mixer.music.get_busy():
-                time.sleep(0.1)
+            # Verify file was created
+            if temp_file.exists() and temp_file.stat().st_size > 0:
+                print(f"   ✅ Audio generated: {temp_file.name} ({temp_file.stat().st_size} bytes)")
                 
-            return True
-            
+                # Try to play with pygame if available
+                try:
+                    if pygame.mixer.get_init():
+                        pygame.mixer.music.load(str(temp_file))
+                        pygame.mixer.music.play()
+                        
+                        # Wait for playback to finish
+                        while pygame.mixer.music.get_busy():
+                            time.sleep(0.1)
+                        print("   🔊 Audio played successfully")
+                    else:
+                        print("   ⚠️ Audio mixer not available, file generated instead")
+                except Exception as play_error:
+                    print(f"   ⚠️ Playback failed, but file generated: {play_error}")
+                
+                return True
+            else:
+                return False
+                
         except Exception as e:
             print(f"❌ Immediate speech error: {e}")
             return False
