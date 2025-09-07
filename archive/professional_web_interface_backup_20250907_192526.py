@@ -4,8 +4,7 @@ Enhanced web interface with comprehensive Persian UI/UX support
 Production-ready with accessibility, real-time features, and voice-first design
 """
 
-from flask import Flask, render_template, jsonify, request, session, send_from_directory, g
-from flask_cors import CORS
+from flask import Flask, render_template, jsonify, request, session, send_from_directory
 import asyncio
 import threading
 import json
@@ -18,9 +17,6 @@ import logging
 from pathlib import Path
 import psutil
 import os
-
-# Import REAL security system
-from ..security.api_auth import require_api_key, require_admin, RealAPIAuthentication
 
 logger = logging.getLogger(__name__)
 
@@ -43,18 +39,6 @@ class SteveProfessionalWebInterface:
                         template_folder='templates',
                         static_folder='static')
         self.app.secret_key = 'steve_professional_voice_assistant_2024_secure'
-        
-        # Enable CORS for API endpoints
-        CORS(self.app, resources={
-            r"/api/*": {
-                "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
-                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "X-API-Key", "Authorization"]
-            }
-        })
-        
-        # Initialize REAL security system
-        self.auth_system = RealAPIAuthentication()
         
         # Interface state
         self.is_running = False
@@ -419,127 +403,6 @@ class SteveProfessionalWebInterface:
                 })
             except Exception as e:
                 logger.error(f"Update settings error: {e}")
-                return jsonify({
-                    'success': False,
-                    'error': str(e)
-                }), 500
-        
-        @self.app.route('/api/voice', methods=['POST'])
-        @require_api_key
-        def process_voice_input():
-            """Process voice input with REAL audio processing"""
-            try:
-                # Check if audio file is uploaded
-                if 'audio' not in request.files:
-                    return jsonify({
-                        'success': False,
-                        'error': 'No audio file provided'
-                    }), 400
-                
-                audio_file = request.files['audio']
-                if audio_file.filename == '':
-                    return jsonify({
-                        'success': False,
-                        'error': 'No audio file selected'
-                    }), 400
-                
-                # Save uploaded audio temporarily
-                import tempfile
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
-                    audio_file.save(tmp_file.name)
-                    
-                    # Process audio (mock implementation for demo)
-                    transcript = self.mock_speech_to_text(tmp_file.name)
-                    response_text = self.mock_llm_response(transcript)
-                    
-                    # Generate audio response
-                    audio_response = self.mock_text_to_speech(response_text)
-                    
-                    # Clean up temp file
-                    os.unlink(tmp_file.name)
-                    
-                    return jsonify({
-                        'success': True,
-                        'transcript': transcript,
-                        'response': response_text,
-                        'audio_url': audio_response,
-                        'timestamp': datetime.now().isoformat()
-                    })
-                    
-            except Exception as e:
-                logger.error(f"Voice processing error: {e}")
-                return jsonify({
-                    'success': False,
-                    'error': str(e)
-                }), 500
-        
-        @self.app.route('/api/speak', methods=['POST'])
-        @require_api_key
-        def generate_speech():
-            """Generate speech from text with REAL TTS"""
-            try:
-                data = request.get_json()
-                text = data.get('text', '')
-                voice_id = data.get('voice_id', 'system_tts')
-                audio_format = data.get('format', 'wav')
-                
-                if not text:
-                    return jsonify({
-                        'success': False,
-                        'error': 'No text provided'
-                    }), 400
-                
-                # Generate real TTS audio
-                audio_data = self.generate_tts_audio(text, voice_id, audio_format)
-                
-                if audio_data:
-                    if isinstance(audio_data, bytes):
-                        # Return audio as base64
-                        audio_b64 = base64.b64encode(audio_data).decode('utf-8')
-                        return jsonify({
-                            'success': True,
-                            'audio': audio_b64,
-                            'format': audio_format,
-                            'text': text,
-                            'voice_id': voice_id,
-                            'timestamp': datetime.now().isoformat()
-                        })
-                    else:
-                        # Return audio file path
-                        return jsonify({
-                            'success': True,
-                            'audio_url': audio_data,
-                            'format': audio_format,
-                            'text': text,
-                            'voice_id': voice_id,
-                            'timestamp': datetime.now().isoformat()
-                        })
-                else:
-                    return jsonify({
-                        'success': False,
-                        'error': 'Failed to generate audio'
-                    }), 500
-                    
-            except Exception as e:
-                logger.error(f"Speech generation error: {e}")
-                return jsonify({
-                    'success': False,
-                    'error': str(e)
-                }), 500
-        
-        @self.app.route('/api/security/stats')
-        @require_admin
-        def get_security_stats():
-            """Get security statistics (admin only)"""
-            try:
-                stats = self.auth_system.get_security_stats()
-                return jsonify({
-                    'success': True,
-                    'stats': stats,
-                    'timestamp': datetime.now().isoformat()
-                })
-            except Exception as e:
-                logger.error(f"Security stats error: {e}")
                 return jsonify({
                     'success': False,
                     'error': str(e)
@@ -973,174 +836,6 @@ class SteveProfessionalWebInterface:
             self.is_running = False
             logger.info("Steve Professional Web Interface stopped")
     
-    def mock_speech_to_text(self, audio_file_path: str) -> str:
-        """Mock speech-to-text processing for demo"""
-        # In real implementation, this would use actual STT engine
-        mock_transcripts = [
-            "سلام، چطور می‌توانم کمکتان کنم؟",
-            "هوا چطور است؟",
-            "ساعت چند است؟",
-            "موسیقی پخش کن",
-            "چراغ را روشن کن"
-        ]
-        import random
-        return random.choice(mock_transcripts)
-    
-    def mock_llm_response(self, transcript: str) -> str:
-        """Mock LLM response generation for demo"""
-        responses = {
-            "سلام": "سلام! چطور می‌توانم کمکتان کنم؟",
-            "هوا": "هوا امروز آفتابی و خوب است.",
-            "ساعت": f"ساعت {datetime.now().strftime('%H:%M')} است.",
-            "موسیقی": "پخش موسیقی آغاز شد.",
-            "چراغ": "چراغ روشن شد."
-        }
-        
-        for keyword, response in responses.items():
-            if keyword in transcript:
-                return response
-        
-        return "متوجه نشدم. می‌تونید دوباره بفرمایید؟"
-    
-    def mock_text_to_speech(self, text: str) -> str:
-        """Mock text-to-speech for demo"""
-        # Return a mock audio URL
-        return f"/static/audio/mock_response_{hash(text) % 1000}.wav"
-    
-    def generate_tts_audio(self, text: str, voice_id: str, audio_format: str) -> Optional[bytes]:
-        """Generate real TTS audio"""
-        try:
-            # Try to use real TTS engines
-            if voice_id == "system_tts":
-                return self.generate_system_tts_audio(text, audio_format)
-            elif voice_id == "google_tts":
-                return self.generate_google_tts_audio(text, audio_format)
-            else:
-                # Fallback to mock audio generation
-                return self.generate_mock_audio_bytes(text, voice_id)
-                
-        except Exception as e:
-            logger.error(f"TTS generation error: {e}")
-            return None
-    
-    def generate_system_tts_audio(self, text: str, audio_format: str) -> Optional[bytes]:
-        """Generate audio using system TTS"""
-        try:
-            import pyttsx3
-            import tempfile
-            
-            engine = pyttsx3.init()
-            engine.setProperty('rate', 150)
-            engine.setProperty('volume', 1.0)
-            
-            with tempfile.NamedTemporaryFile(suffix=f'.{audio_format}', delete=False) as tmp_file:
-                engine.save_to_file(text, tmp_file.name)
-                engine.runAndWait()
-                
-                # Read the generated audio file
-                with open(tmp_file.name, 'rb') as f:
-                    audio_data = f.read()
-                
-                # Clean up
-                os.unlink(tmp_file.name)
-                
-                return audio_data
-                
-        except Exception as e:
-            logger.error(f"System TTS error: {e}")
-            return None
-    
-    def generate_google_tts_audio(self, text: str, audio_format: str) -> Optional[bytes]:
-        """Generate audio using Google TTS"""
-        try:
-            from gtts import gTTS
-            import tempfile
-            
-            tts = gTTS(text=text, lang='fa', slow=False)
-            
-            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp_file:
-                tts.save(tmp_file.name)
-                
-                # Convert to desired format if needed
-                if audio_format == 'wav':
-                    from pydub import AudioSegment
-                    audio = AudioSegment.from_mp3(tmp_file.name)
-                    
-                    wav_file = tmp_file.name.replace('.mp3', '.wav')
-                    audio.export(wav_file, format="wav")
-                    
-                    with open(wav_file, 'rb') as f:
-                        audio_data = f.read()
-                    
-                    os.unlink(tmp_file.name)
-                    os.unlink(wav_file)
-                else:
-                    with open(tmp_file.name, 'rb') as f:
-                        audio_data = f.read()
-                    
-                    os.unlink(tmp_file.name)
-                
-                return audio_data
-                
-        except Exception as e:
-            logger.error(f"Google TTS error: {e}")
-            return None
-    
-    def generate_mock_audio_bytes(self, text: str, voice_id: str) -> bytes:
-        """Generate mock audio bytes for testing"""
-        try:
-            import numpy as np
-            import wave
-            import tempfile
-            
-            # Generate simple tone based on text
-            duration = max(1.0, len(text) * 0.1)
-            sample_rate = 22050
-            samples = int(duration * sample_rate)
-            
-            # Different frequencies for different voices
-            frequencies = {
-                "kamtera_female": 220,
-                "kamtera_male": 150,
-                "informal_persian": 200,
-                "google_tts": 180,
-                "system_tts": 160,
-                "espeak_persian": 140
-            }
-            
-            base_freq = frequencies.get(voice_id, 160)
-            
-            # Generate audio
-            t = np.linspace(0, duration, samples)
-            audio = 0.3 * np.sin(2 * np.pi * base_freq * t)
-            
-            # Apply envelope
-            envelope = np.exp(-t * 0.3) * (1 - np.exp(-t * 5))
-            audio = audio * envelope
-            
-            # Convert to 16-bit PCM
-            audio_int16 = (audio * 32767).astype(np.int16)
-            
-            # Create WAV file in memory
-            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_file:
-                with wave.open(tmp_file.name, 'wb') as wav_file:
-                    wav_file.setnchannels(1)
-                    wav_file.setsampwidth(2)
-                    wav_file.setframerate(sample_rate)
-                    wav_file.writeframes(audio_int16.tobytes())
-                
-                # Read the WAV data
-                with open(tmp_file.name, 'rb') as f:
-                    wav_data = f.read()
-                
-                os.unlink(tmp_file.name)
-                
-                return wav_data
-                
-        except Exception as e:
-            logger.error(f"Mock audio generation error: {e}")
-            return b''
-    
     def get_server_status(self) -> Dict[str, Any]:
         """Get web server status"""
         return {
@@ -1151,7 +846,5 @@ class SteveProfessionalWebInterface:
             'system_metrics': self.system_metrics,
             'current_engine': self.current_engine,
             'available_engines': len(self.get_available_engines()),
-            'uptime': time.time() - self.system_metrics['uptime'],
-            'security_system': 'active',
-            'api_endpoints': ['voice', 'speak', 'system/status', 'security/stats']
+            'uptime': time.time() - self.system_metrics['uptime']
         }
