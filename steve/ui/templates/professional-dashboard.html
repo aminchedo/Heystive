@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="دستیار صوتی فارسی استیو - رابط کاربری حرفه‌ای با پشتیبانی کامل از RTL و دسترسی‌پذیری">
+    <meta name="keywords" content="Persian, Voice Assistant, TTS, STT, Smart Home, AI">
+    <meta name="author" content="Steve Persian Voice Assistant">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="دستیار صوتی فارسی استیو">
+    <meta property="og:description" content="دستیار صوتی پیشرفته با پشتیبانی کامل از زبان فارسی">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="دستیار صوتی فارسی استیو">
+    <meta property="twitter:description" content="دستیار صوتی پیشرفته با پشتیبانی کامل از زبان فارسی">
+
+    <title>استیو - دستیار صوتی فارسی | Steve Persian Voice Assistant</title>
+    
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Design System -->
+    <link rel="stylesheet" href="/static/css/persian-design-system.css">
+    
+    <!-- Component Styles -->
+    <style>
+        /* ========================================
+           PROFESSIONAL DASHBOARD STYLES
+           ======================================== */
+        
+        .dashboard {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Vazirmatn', var(--font-primary);
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-4) 0;
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+        
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-3);
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .dashboard-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: var(--text-lg);
+            margin-top: var(--space-2);
+        }
+        
+        .dashboard-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: var(--space-6);
+            padding: var(--space-8) var(--space-4);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* ========================================
+           VOICE CONTROL SECTION
+           ======================================== */
+        
+        .voice-control-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-6);
+        }
+        
+        .voice-visualizer-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .voice-status-display {
+            text-align: center;
+            margin-top: var(--space-4);
+        }
+        
+        .voice-status-text {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .voice-status-description {
+            font-size: var(--text-base);
+            color: var(--text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+        
+        .conversation-display {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-lg);
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: var(--space-6);
+        }
+        
+        .conversation-message {
+            margin-bottom: var(--space-4);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .conversation-message.user {
+            background: var(--color-primary-100);
+            color: var(--color-primary-900);
+            margin-left: auto;
+            text-align: left;
+        }
+        
+        .conversation-message.assistant {
+            background: var(--color-gray-100);
+            color: var(--text-primary);
+            margin-right: auto;
+            text-align: right;
+        }
+        
+        .conversation-message .timestamp {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            margin-top: var(--space-1);
+        }
+        
+        /* ========================================
+           CONTROL PANELS
+           ======================================== */
+        
+        .control-panel {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
+        }
+        
+        .panel-title {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .panel-section {
+            margin-bottom: var(--space-6);
+        }
+        
+        .panel-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: var(--text-lg);
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+        }
+        
+        /* ========================================
+           VOICE ENGINE SELECTION
+           ======================================== */
+        
+        .engine-selector {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+        
+        .engine-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-in-out);
+        }
+        
+        .engine-option:hover {
+            border-color: var(--color-primary);
+            background: var(--color-primary-50);
+        }
+        
+        .engine-option.active {
+            border-color: var(--color-primary);
+            background: var(--color-primary-100);
+        }
+        
+        .engine-info {
+            flex: 1;
+        }
+        
+        .engine-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+        
+        .engine-details {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .engine-actions {
+            display: flex;
+            gap: var(--space-2);
+        }
+        
+        .engine-test-btn {
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--text-sm);
+            background: var(--color-secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-in-out);
+        }
+        
+        .engine-test-btn:hover {
+            background: var(--color-secondary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .engine-test-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* ========================================
+           SYSTEM MONITORING
+           ======================================== */
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+        
+        .metric-card {
+            background: var(--bg-secondary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--space-1);
+        }
+        
+        .metric-label {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .performance-chart {
+            height: 200px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            margin-top: var(--space-4);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: 500;
+        }
+        
+        .status-indicator.online {
+            background: var(--color-secondary-100);
+            color: var(--color-secondary-900);
+        }
+        
+        .status-indicator.offline {
+            background: var(--color-accent-100);
+            color: var(--color-accent-900);
+        }
+        
+        .status-indicator.warning {
+            background: var(--color-warning-100);
+            color: var(--color-warning-900);
+        }
+        
+        /* ========================================
+           QUICK ACTIONS
+           ======================================== */
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+        }
+        
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-4);
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-in-out);
+            min-height: var(--touch-target-comfortable);
+        }
+        
+        .quick-action-btn:hover {
+            background: var(--color-gray-200);
+            transform: translateY(-2px);
+        }
+        
+        .quick-action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .quick-action-icon {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+        }
+        
+        .quick-action-label {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+        }
+        
+        /* ========================================
+           SETTINGS PANEL
+           ======================================== */
+        
+        .settings-group {
+            margin-bottom: var(--space-6);
+        }
+        
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .setting-description {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-top: var(--space-1);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: var(--color-gray-300);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-in-out);
+        }
+        
+        .toggle-switch.active {
+            background: var(--color-primary);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: var(--radius-full);
+            transition: all var(--duration-normal) var(--ease-in-out);
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(-24px);
+        }
+        
+        /* ========================================
+           RESPONSIVE DESIGN
+           ======================================== */
+        
+        @media (max-width: 1024px) {
+            .dashboard-main {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+                padding: var(--space-4);
+            }
+            
+            .voice-control-section {
+                order: 1;
+            }
+            
+            .control-panel:nth-child(2) {
+                order: 2;
+            }
+            
+            .control-panel:nth-child(3) {
+                order: 3;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: var(--text-2xl);
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .conversation-display {
+                max-height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-header {
+                padding: var(--space-3) 0;
+            }
+            
+            .dashboard-main {
+                padding: var(--space-3);
+                gap: var(--space-3);
+            }
+            
+            .control-panel {
+                padding: var(--space-4);
+            }
+            
+            .conversation-message {
+                max-width: 90%;
+            }
+        }
+        
+        /* ========================================
+           LOADING STATES
+           ======================================== */
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-gray-300);
+            border-top: 2px solid var(--color-primary);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, var(--color-gray-200) 25%, var(--color-gray-100) 50%, var(--color-gray-200) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* ========================================
+           ACCESSIBILITY ENHANCEMENTS
+           ======================================== */
+        
+        @media (prefers-reduced-motion: reduce) {
+            .voice-visualizer-container * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        .focus-trap {
+            position: fixed;
+            top: -1px;
+            left: -1px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .control-panel {
+                border: 2px solid var(--text-primary);
+            }
+            
+            .engine-option {
+                border-width: 3px;
+            }
+            
+            .btn {
+                border: 2px solid currentColor;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .dashboard {
+                background: white;
+            }
+            
+            .voice-visualizer-container,
+            .quick-actions,
+            .engine-test-btn {
+                display: none;
+            }
+            
+            .control-panel {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+
+<body class="dashboard">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="sr-only sr-only-focusable">پرش به محتوای اصلی</a>
+    
+    <!-- Dashboard Header -->
+    <header class="dashboard-header" role="banner">
+        <div class="container">
+            <h1 class="dashboard-title">
+                <i class="fas fa-microphone-alt" aria-hidden="true"></i>
+                <span>استیو - دستیار صوتی فارسی</span>
+            </h1>
+            <p class="dashboard-subtitle">
+                Steve Persian Voice Assistant - Professional Interface
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main id="main-content" class="dashboard-main" role="main">
+        
+        <!-- Left Panel: Voice Engine & Settings -->
+        <aside class="control-panel" role="complementary" aria-labelledby="engine-panel-title">
+            <h2 id="engine-panel-title" class="panel-title">
+                <i class="fas fa-cogs" aria-hidden="true"></i>
+                <span>موتورهای صوتی</span>
+            </h2>
+            
+            <!-- Voice Engine Selection -->
+            <section class="panel-section">
+                <h3 class="section-title">انتخاب موتور TTS</h3>
+                <div class="engine-selector" role="radiogroup" aria-labelledby="engine-selector-title">
+                    <div class="engine-option active" role="radio" aria-checked="true" tabindex="0" data-engine="kamtera_female">
+                        <div class="engine-info">
+                            <div class="engine-name">Kamtera Female VITS</div>
+                            <div class="engine-details">کیفیت: عالی | نوع: زن | آفلاین</div>
+                        </div>
+                        <div class="engine-actions">
+                            <button class="engine-test-btn" aria-label="تست صدای Kamtera Female">
+                                <i class="fas fa-play" aria-hidden="true"></i>
+                                تست
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="engine-option" role="radio" aria-checked="false" tabindex="-1" data-engine="kamtera_male">
+                        <div class="engine-info">
+                            <div class="engine-name">Kamtera Male VITS</div>
+                            <div class="engine-details">کیفیت: بالا | نوع: مرد | آفلاین</div>
+                        </div>
+                        <div class="engine-actions">
+                            <button class="engine-test-btn" aria-label="تست صدای Kamtera Male">
+                                <i class="fas fa-play" aria-hidden="true"></i>
+                                تست
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="engine-option" role="radio" aria-checked="false" tabindex="-1" data-engine="informal_persian">
+                        <div class="engine-info">
+                            <div class="engine-name">Informal Persian VITS</div>
+                            <div class="engine-details">کیفیت: بالا | نوع: محاوره‌ای | آفلاین</div>
+                        </div>
+                        <div class="engine-actions">
+                            <button class="engine-test-btn" aria-label="تست صدای Informal Persian">
+                                <i class="fas fa-play" aria-hidden="true"></i>
+                                تست
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="engine-option" role="radio" aria-checked="false" tabindex="-1" data-engine="google_tts">
+                        <div class="engine-info">
+                            <div class="engine-name">Google TTS</div>
+                            <div class="engine-details">کیفیت: بالا | نوع: خنثی | آنلاین</div>
+                        </div>
+                        <div class="engine-actions">
+                            <button class="engine-test-btn" aria-label="تست صدای Google TTS">
+                                <i class="fas fa-play" aria-hidden="true"></i>
+                                تست
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Quick Settings -->
+            <section class="panel-section">
+                <h3 class="section-title">تنظیمات سریع</h3>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">حالت صوتی</div>
+                            <div class="setting-description">فعال‌سازی تشخیص و تولید گفتار</div>
+                        </div>
+                        <div class="toggle-switch active" role="switch" aria-checked="true" tabindex="0" aria-labelledby="voice-mode-label"></div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">کنتراست بالا</div>
+                            <div class="setting-description">بهبود نمایش برای کاربران کم‌بینا</div>
+                        </div>
+                        <div class="toggle-switch" role="switch" aria-checked="false" tabindex="0" aria-labelledby="high-contrast-label"></div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">حرکت کاهش‌یافته</div>
+                            <div class="setting-description">کاهش انیمیشن‌ها برای راحتی بیشتر</div>
+                        </div>
+                        <div class="toggle-switch" role="switch" aria-checked="false" tabindex="0" aria-labelledby="reduced-motion-label"></div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Center Panel: Voice Control & Conversation -->
+        <section class="voice-control-section" role="main" aria-labelledby="voice-control-title">
+            <h2 id="voice-control-title" class="sr-only">کنترل صوتی</h2>
+            
+            <!-- Voice Visualizer -->
+            <div class="voice-visualizer-container">
+                <div id="voice-visualizer" tabindex="0" role="button" aria-label="دکمه کنترل صوتی - برای شروع کلیک کنید"></div>
+            </div>
+            
+            <!-- Voice Status Display -->
+            <div class="voice-status-display">
+                <div class="voice-status-text" id="voice-status-text">آماده شنیدن...</div>
+                <div class="voice-status-description" id="voice-status-description">
+                    برای شروع گفتگو روی میکروفون کلیک کنید یا "هی استیو" بگویید
+                </div>
+            </div>
+            
+            <!-- Conversation Display -->
+            <div class="conversation-display" role="log" aria-label="تاریخچه گفتگو" aria-live="polite">
+                <div class="conversation-message assistant">
+                    <div>سلام! من استیو هستم، دستیار صوتی فارسی شما. چطور می‌تونم کمکتون کنم؟</div>
+                    <div class="timestamp">الان</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: System Monitoring & Quick Actions -->
+        <aside class="control-panel" role="complementary" aria-labelledby="system-panel-title">
+            <h2 id="system-panel-title" class="panel-title">
+                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                <span>نظارت سیستم</span>
+            </h2>
+            
+            <!-- System Status -->
+            <section class="panel-section">
+                <h3 class="section-title">وضعیت سیستم</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="cpu-usage">--</div>
+                        <div class="metric-label">استفاده CPU</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="memory-usage">--</div>
+                        <div class="metric-label">استفاده RAM</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="response-time">--</div>
+                        <div class="metric-label">زمان پاسخ</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="audio-quality">--</div>
+                        <div class="metric-label">کیفیت صوت</div>
+                    </div>
+                </div>
+                
+                <!-- Component Status -->
+                <div style="margin-top: var(--space-4);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                        <span>TTS Engine:</span>
+                        <span class="status-indicator online">
+                            <i class="fas fa-circle" aria-hidden="true"></i>
+                            آنلاین
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                        <span>STT Engine:</span>
+                        <span class="status-indicator online">
+                            <i class="fas fa-circle" aria-hidden="true"></i>
+                            آنلاین
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                        <span>Wake Word:</span>
+                        <span class="status-indicator online">
+                            <i class="fas fa-circle" aria-hidden="true"></i>
+                            فعال
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Smart Home:</span>
+                        <span class="status-indicator warning">
+                            <i class="fas fa-circle" aria-hidden="true"></i>
+                            در انتظار
+                        </span>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Quick Actions -->
+            <section class="panel-section">
+                <h3 class="section-title">عملیات سریع</h3>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" aria-label="تست سیستم صوتی">
+                        <i class="quick-action-icon fas fa-microphone-alt" aria-hidden="true"></i>
+                        <span class="quick-action-label">تست صوت</span>
+                    </button>
+                    
+                    <button class="quick-action-btn" aria-label="تنظیمات پیشرفته">
+                        <i class="quick-action-icon fas fa-cog" aria-hidden="true"></i>
+                        <span class="quick-action-label">تنظیمات</span>
+                    </button>
+                    
+                    <button class="quick-action-btn" aria-label="راهنمای استفاده">
+                        <i class="quick-action-icon fas fa-question-circle" aria-hidden="true"></i>
+                        <span class="quick-action-label">راهنما</span>
+                    </button>
+                    
+                    <button class="quick-action-btn" aria-label="بازنشانی سیستم">
+                        <i class="quick-action-icon fas fa-redo-alt" aria-hidden="true"></i>
+                        <span class="quick-action-label">بازنشانی</span>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Performance Chart Placeholder -->
+            <section class="panel-section">
+                <h3 class="section-title">نمودار عملکرد</h3>
+                <div class="performance-chart">
+                    <i class="fas fa-chart-area" style="font-size: 2rem; margin-bottom: var(--space-2);"></i>
+                    <div>نمودار در حال بارگذاری...</div>
+                </div>
+            </section>
+        </aside>
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true" style="position: fixed; top: var(--space-4); left: var(--space-4); z-index: var(--z-toast);"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/voice-visualizer.js"></script>
+    <script>
+        // Initialize the professional dashboard
+        class SteveProfessionalDashboard {
+            constructor() {
+                this.voiceVisualizer = null;
+                this.currentEngine = 'kamtera_female';
+                this.isListening = false;
+                this.conversation = [];
+                this.systemMetrics = {
+                    cpu: 0,
+                    memory: 0,
+                    responseTime: 0,
+                    audioQuality: 0
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.initializeVoiceVisualizer();
+                this.setupEventListeners();
+                this.startSystemMonitoring();
+                this.loadInitialData();
+                
+                console.log('Steve Professional Dashboard initialized');
+            }
+            
+            initializeVoiceVisualizer() {
+                this.voiceVisualizer = new PersianVoiceVisualizer('voice-visualizer', {
+                    width: 300,
+                    height: 300,
+                    accessibility: {
+                        announcements: true,
+                        visualFeedback: true
+                    }
+                });
+                
+                // Listen for visualizer interactions
+                document.getElementById('voice-visualizer').addEventListener('voiceVisualizerClick', (e) => {
+                    this.handleVoiceInteraction();
+                });
+            }
+            
+            setupEventListeners() {
+                // Engine selection
+                document.querySelectorAll('.engine-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        this.selectEngine(option.dataset.engine);
+                    });
+                    
+                    option.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.selectEngine(option.dataset.engine);
+                        }
+                    });
+                });
+                
+                // Engine test buttons
+                document.querySelectorAll('.engine-test-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const engine = e.target.closest('.engine-option').dataset.engine;
+                        this.testEngine(engine);
+                    });
+                });
+                
+                // Toggle switches
+                document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        this.toggleSetting(toggle);
+                    });
+                    
+                    toggle.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.toggleSetting(toggle);
+                        }
+                    });
+                });
+                
+                // Quick action buttons
+                document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.handleQuickAction(btn);
+                    });
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === ' ') {
+                        e.preventDefault();
+                        this.handleVoiceInteraction();
+                    }
+                });
+            }
+            
+            selectEngine(engineId) {
+                // Update UI
+                document.querySelectorAll('.engine-option').forEach(option => {
+                    const isSelected = option.dataset.engine === engineId;
+                    option.classList.toggle('active', isSelected);
+                    option.setAttribute('aria-checked', isSelected);
+                    option.tabIndex = isSelected ? 0 : -1;
+                });
+                
+                this.currentEngine = engineId;
+                this.showToast(`موتور صوتی تغییر کرد: ${this.getEngineName(engineId)}`, 'success');
+                
+                // Notify backend
+                this.notifyEngineChange(engineId);
+            }
+            
+            async testEngine(engineId) {
+                const btn = document.querySelector(`[data-engine="${engineId}"] .engine-test-btn`);
+                const originalText = btn.innerHTML;
+                
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال تست...';
+                
+                try {
+                    const response = await fetch('/api/voice/test-engine', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            engine: engineId,
+                            text: 'سلام! این تست موتور صوتی است'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showToast(`تست موتور ${this.getEngineName(engineId)} موفقیت‌آمیز بود`, 'success');
+                        
+                        // Play audio if provided
+                        if (result.audio) {
+                            this.playAudio(result.audio, result.format);
+                        }
+                    } else {
+                        this.showToast(`خطا در تست موتور: ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.showToast(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
+            
+            toggleSetting(toggle) {
+                const isActive = toggle.classList.contains('active');
+                toggle.classList.toggle('active');
+                toggle.setAttribute('aria-checked', !isActive);
+                
+                // Handle specific settings
+                const settingItem = toggle.closest('.setting-item');
+                const label = settingItem.querySelector('.setting-label').textContent;
+                
+                this.showToast(`${label} ${isActive ? 'غیرفعال' : 'فعال'} شد`, 'info');
+            }
+            
+            handleQuickAction(btn) {
+                const label = btn.querySelector('.quick-action-label').textContent;
+                
+                switch (label) {
+                    case 'تست صوت':
+                        this.testCurrentEngine();
+                        break;
+                    case 'تنظیمات':
+                        this.openSettings();
+                        break;
+                    case 'راهنما':
+                        this.showHelp();
+                        break;
+                    case 'بازنشانی':
+                        this.resetSystem();
+                        break;
+                }
+            }
+            
+            async handleVoiceInteraction() {
+                if (this.isListening) {
+                    this.stopListening();
+                } else {
+                    this.startListening();
+                }
+            }
+            
+            async startListening() {
+                this.isListening = true;
+                this.voiceVisualizer.setState('listening', {
+                    message: 'شروع شنیدن صدای شما'
+                });
+                
+                this.updateStatusDisplay('در حال شنیدن...', 'صحبت کنید...');
+                
+                try {
+                    // Initialize audio visualization
+                    await this.voiceVisualizer.initializeAudioVisualization();
+                    
+                    // Start voice recognition
+                    const response = await fetch('/api/voice/start-listening', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!result.success) {
+                        throw new Error(result.error || 'خطا در شروع شنیدن');
+                    }
+                } catch (error) {
+                    this.handleVoiceError(error);
+                }
+            }
+            
+            async stopListening() {
+                this.isListening = false;
+                this.voiceVisualizer.setState('processing', {
+                    message: 'در حال پردازش گفتار شما'
+                });
+                
+                this.updateStatusDisplay('در حال پردازش...', 'لطفاً صبر کنید...');
+                
+                try {
+                    const response = await fetch('/api/voice/stop-listening', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.transcript) {
+                        this.handleVoiceInput(result.transcript);
+                    } else {
+                        this.voiceVisualizer.setState('idle');
+                        this.updateStatusDisplay('آماده شنیدن...', 'برای شروع گفتگو کلیک کنید');
+                    }
+                } catch (error) {
+                    this.handleVoiceError(error);
+                }
+            }
+            
+            async handleVoiceInput(transcript) {
+                // Add user message to conversation
+                this.addConversationMessage(transcript, 'user');
+                
+                // Get AI response
+                this.voiceVisualizer.setState('processing');
+                
+                try {
+                    const response = await fetch('/api/voice/process', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            text: transcript,
+                            engine: this.currentEngine
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Add assistant response
+                        this.addConversationMessage(result.response_text, 'assistant');
+                        
+                        // Play audio response
+                        if (result.audio) {
+                            this.voiceVisualizer.setState('speaking', {
+                                message: 'پخش پاسخ صوتی'
+                            });
+                            
+                            await this.playAudio(result.audio, result.format);
+                        }
+                        
+                        // Return to idle state
+                        this.voiceVisualizer.setState('idle');
+                        this.updateStatusDisplay('آماده شنیدن...', 'برای ادامه گفتگو کلیک کنید');
+                    } else {
+                        throw new Error(result.error || 'خطا در پردازش');
+                    }
+                } catch (error) {
+                    this.handleVoiceError(error);
+                }
+            }
+            
+            handleVoiceError(error) {
+                console.error('Voice error:', error);
+                this.voiceVisualizer.setState('error', {
+                    message: `خطا: ${error.message}`
+                });
+                
+                this.updateStatusDisplay('خطا رخ داده است', 'برای تلاش مجدد کلیک کنید');
+                this.showToast(`خطا: ${error.message}`, 'error');
+                
+                this.isListening = false;
+                
+                // Auto-recover after 3 seconds
+                setTimeout(() => {
+                    this.voiceVisualizer.setState('idle');
+                    this.updateStatusDisplay('آماده شنیدن...', 'برای شروع گفتگو کلیک کنید');
+                }, 3000);
+            }
+            
+            addConversationMessage(text, sender) {
+                const conversationDisplay = document.querySelector('.conversation-display');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `conversation-message ${sender}`;
+                
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('fa-IR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                messageDiv.innerHTML = `
+                    <div>${text}</div>
+                    <div class="timestamp">${timeString}</div>
+                `;
+                
+                conversationDisplay.appendChild(messageDiv);
+                conversationDisplay.scrollTop = conversationDisplay.scrollHeight;
+                
+                // Store in conversation history
+                this.conversation.push({
+                    text,
+                    sender,
+                    timestamp: now.toISOString()
+                });
+            }
+            
+            updateStatusDisplay(status, description) {
+                document.getElementById('voice-status-text').textContent = status;
+                document.getElementById('voice-status-description').textContent = description;
+            }
+            
+            async playAudio(audioData, format) {
+                return new Promise((resolve, reject) => {
+                    const audio = new Audio(`data:audio/${format};base64,${audioData}`);
+                    
+                    audio.onloadstart = () => {
+                        this.voiceVisualizer.setState('speaking');
+                    };
+                    
+                    audio.onended = () => {
+                        resolve();
+                    };
+                    
+                    audio.onerror = (error) => {
+                        reject(new Error('خطا در پخش صوت'));
+                    };
+                    
+                    audio.play().catch(reject);
+                });
+            }
+            
+            startSystemMonitoring() {
+                // Update system metrics every 5 seconds
+                setInterval(() => {
+                    this.updateSystemMetrics();
+                }, 5000);
+                
+                // Initial update
+                this.updateSystemMetrics();
+            }
+            
+            async updateSystemMetrics() {
+                try {
+                    const response = await fetch('/api/system/metrics');
+                    const metrics = await response.json();
+                    
+                    if (metrics.success) {
+                        this.systemMetrics = metrics.data;
+                        this.renderSystemMetrics();
+                    }
+                } catch (error) {
+                    console.warn('Failed to update system metrics:', error);
+                }
+            }
+            
+            renderSystemMetrics() {
+                document.getElementById('cpu-usage').textContent = `${Math.round(this.systemMetrics.cpu || 0)}%`;
+                document.getElementById('memory-usage').textContent = `${Math.round(this.systemMetrics.memory || 0)}%`;
+                document.getElementById('response-time').textContent = `${Math.round(this.systemMetrics.responseTime || 0)}ms`;
+                document.getElementById('audio-quality').textContent = `${Math.round(this.systemMetrics.audioQuality || 85)}%`;
+            }
+            
+            async loadInitialData() {
+                try {
+                    const response = await fetch('/api/system/status');
+                    const status = await response.json();
+                    
+                    if (status.success) {
+                        // Update engine list if needed
+                        this.updateEngineStatus(status.engines);
+                    }
+                } catch (error) {
+                    console.warn('Failed to load initial data:', error);
+                }
+            }
+            
+            updateEngineStatus(engines) {
+                // Update engine availability in UI
+                Object.entries(engines || {}).forEach(([engineId, engineData]) => {
+                    const option = document.querySelector(`[data-engine="${engineId}"]`);
+                    if (option) {
+                        const testBtn = option.querySelector('.engine-test-btn');
+                        testBtn.disabled = !engineData.available;
+                    }
+                });
+            }
+            
+            getEngineName(engineId) {
+                const names = {
+                    'kamtera_female': 'Kamtera Female VITS',
+                    'kamtera_male': 'Kamtera Male VITS',
+                    'informal_persian': 'Informal Persian VITS',
+                    'google_tts': 'Google TTS'
+                };
+                return names[engineId] || engineId;
+            }
+            
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.style.cssText = `
+                    background: ${type === 'error' ? 'var(--color-accent-100)' : 
+                                type === 'success' ? 'var(--color-secondary-100)' : 
+                                'var(--color-primary-100)'};
+                    color: ${type === 'error' ? 'var(--color-accent-900)' : 
+                             type === 'success' ? 'var(--color-secondary-900)' : 
+                             'var(--color-primary-900)'};
+                    padding: var(--space-4);
+                    border-radius: var(--radius-lg);
+                    margin-bottom: var(--space-2);
+                    box-shadow: var(--shadow-lg);
+                    max-width: 400px;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 
+                                          type === 'success' ? 'check-circle' : 
+                                          'info-circle'}"></i>
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="margin-right: auto; background: none; border: none; cursor: pointer; font-size: 1.2em;">×</button>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.style.animation = 'slideOut 0.3s ease-in forwards';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, 5000);
+            }
+            
+            async testCurrentEngine() {
+                await this.testEngine(this.currentEngine);
+            }
+            
+            openSettings() {
+                this.showToast('تنظیمات پیشرفته در نسخه بعدی ارائه خواهد شد', 'info');
+            }
+            
+            showHelp() {
+                this.addConversationMessage('راهنمای استفاده از دستیار صوتی استیو:', 'assistant');
+                this.addConversationMessage('• برای شروع گفتگو روی میکروفون کلیک کنید\n• می‌توانید "هی استیو" بگویید\n• موتور صوتی مناسب را انتخاب کنید\n• از کلیدهای میانبر استفاده کنید (Ctrl+Space)', 'assistant');
+            }
+            
+            async resetSystem() {
+                this.showToast('در حال بازنشانی سیستم...', 'info');
+                
+                try {
+                    const response = await fetch('/api/system/reset', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showToast('سیستم با موفقیت بازنشانی شد', 'success');
+                        // Reload page after 2 seconds
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        this.showToast(`خطا در بازنشانی: ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    this.showToast(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+                }
+            }
+            
+            async notifyEngineChange(engineId) {
+                try {
+                    await fetch('/api/voice/set-engine', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ engine: engineId })
+                    });
+                } catch (error) {
+                    console.warn('Failed to notify engine change:', error);
+                }
+            }
+        }
+        
+        // Add required CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize dashboard when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.steveDashboard = new SteveProfessionalDashboard();
+        });
+        
+        // Service Worker registration for PWA capabilities
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
