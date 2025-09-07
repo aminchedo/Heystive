@@ -1,0 +1,3 @@
+VOICE OUTPUT: Hello! I am Luna, your expense management assistant.
+Generated at: 2025-09-07T14:49:21.764655
+Duration estimate: 5.20 seconds

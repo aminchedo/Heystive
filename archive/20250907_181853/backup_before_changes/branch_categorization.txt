@@ -1,0 +1,34 @@
+BRANCH CATEGORIZATION ANALYSIS
+=============================
+
+ANALYZING BRANCH: cursor/build-voice-assistant-with-langgraph-and-mcp-809c
+=========================
+Commits not in main: 0
+Files not in main: 66
+Status: COMPLETELY MERGED - Safe to delete
+Unique commits:
+=========================
+
+ANALYZING BRANCH: cursor/implement-multi-tts-engine-selection-970c
+=========================
+Commits not in main: 0
+Files not in main: 19
+Status: COMPLETELY MERGED - Safe to delete
+Unique commits:
+=========================
+
+ANALYZING BRANCH: cursor/implement-persian-voice-capabilities-for-heystive-2cd9
+=========================
+Commits not in main: 0
+Files not in main: 40
+Status: COMPLETELY MERGED - Safe to delete
+Unique commits:
+=========================
+
+ANALYZING BRANCH: cursor/integrate-multiple-persian-tts-engines-8d9a
+=========================
+Commits not in main: 0
+Files not in main: 0
+Status: COMPLETELY MERGED - Safe to delete
+Unique commits:
+=========================
