@@ -5,29 +5,15 @@ Hardware-optimized transcription with Persian language support
 
 import asyncio
 import numpy as np
+import torch
+import torchaudio
+import whisper
 from typing import Dict, Any, Optional, List, Tuple
 import logging
 import time
 from pathlib import Path
 import psutil
 import gc
-
-# Optional imports
-try:
-    import torch
-    import torchaudio
-    TORCH_AVAILABLE = True
-except ImportError:
-    torch = None
-    torchaudio = None
-    TORCH_AVAILABLE = False
-
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except ImportError:
-    whisper = None
-    WHISPER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -135,66 +121,23 @@ class AdaptivePersianSTT:
             model_name = self.model_config["primary_model"]
             logger.info(f"Loading primary model: {model_name}")
             
-            # Try to load Whisper model
-            try:
-                import whisper
-                
-                # Load model with hardware optimization
-                self.primary_model = whisper.load_model(
-                    model_name,
-                    device=self.model_config["device"],
-                    download_root="./models/whisper"
-                )
-                
-                # Set compute type for optimization
-                if hasattr(self.primary_model, 'encoder'):
-                    if self.model_config["compute_type"] == "int8":
-                        self.primary_model = self.primary_model.half()
-                
-                logger.info(f"Primary model {model_name} loaded successfully")
-                
-            except ImportError:
-                logger.warning("OpenAI Whisper not available. Using mock model for testing.")
-                # Create mock model for testing
-                self.primary_model = self._create_mock_whisper_model(model_name)
-                logger.info(f"Mock primary model {model_name} created")
-                
-            except Exception as e:
-                logger.warning(f"Failed to load Whisper model {model_name}: {e}")
-                # Create mock model as fallback
-                self.primary_model = self._create_mock_whisper_model(model_name)
-                logger.info(f"Fallback mock model {model_name} created")
+            # Load model with hardware optimization
+            self.primary_model = whisper.load_model(
+                model_name,
+                device=self.model_config["device"],
+                download_root="./models/whisper"
+            )
+            
+            # Set compute type for optimization
+            if hasattr(self.primary_model, 'encoder'):
+                if self.model_config["compute_type"] == "int8":
+                    self.primary_model = self.primary_model.half()
+            
+            logger.info(f"Primary model {model_name} loaded successfully")
             
         except Exception as e:
             logger.error(f"Failed to load primary model: {e}")
             raise
-    
-    def _create_mock_whisper_model(self, model_name: str):
-        """Create mock Whisper model for testing"""
-        class MockWhisperModel:
-            def __init__(self, model_name):
-                self.model_name = model_name
-                self.language = "fa"
-            
-            def transcribe(self, audio, language="fa", task="transcribe", **kwargs):
-                """Mock transcription that returns Persian text"""
-                # Simple mock transcription based on audio characteristics
-                if hasattr(audio, '__len__') and len(audio) > 0:
-                    # Generate mock Persian transcription based on audio length
-                    duration = len(audio) / 16000  # Assume 16kHz
-                    
-                    if duration < 1.0:
-                        return {"text": "سلام"}
-                    elif duration < 2.0:
-                        return {"text": "چراغ را روشن کن"}
-                    elif duration < 3.0:
-                        return {"text": "ساعت چند است"}
-                    else:
-                        return {"text": "من استیو هستم و آماده کمک به شما می‌باشم"}
-                else:
-                    return {"text": "متوجه نشدم"}
-        
-        return MockWhisperModel(model_name)
     
     async def _load_backup_model(self):
         """Load backup Whisper model for fallback"""
@@ -206,24 +149,13 @@ class AdaptivePersianSTT:
             model_name = self.model_config["backup_model"]
             logger.info(f"Loading backup model: {model_name}")
             
-            try:
-                import whisper
-                
-                self.backup_model = whisper.load_model(
-                    model_name,
-                    device="cpu",  # Always use CPU for backup
-                    download_root="./models/whisper"
-                )
-                
-                logger.info(f"Backup model {model_name} loaded successfully")
-                
-            except ImportError:
-                logger.warning("Whisper not available for backup model. Using mock.")
-                self.backup_model = self._create_mock_whisper_model(model_name)
-                
-            except Exception as e:
-                logger.warning(f"Failed to load backup model: {e}")
-                self.backup_model = self._create_mock_whisper_model(model_name)
+            self.backup_model = whisper.load_model(
+                model_name,
+                device="cpu",  # Always use CPU for backup
+                download_root="./models/whisper"
+            )
+            
+            logger.info(f"Backup model {model_name} loaded successfully")
             
         except Exception as e:
             logger.warning(f"Failed to load backup model: {e}")
@@ -419,84 +351,48 @@ class AdaptivePersianSTT:
     async def capture_speech(self, duration: float = 5.0) -> np.ndarray:
         """Capture speech from microphone"""
         try:
-            # Try to use real audio capture
-            try:
-                import pyaudio
-                
-                # Audio configuration
-                sample_rate = 16000
-                chunk_size = 1024
-                channels = 1
-                format = pyaudio.paInt16
-                
-                # Initialize PyAudio
-                p = pyaudio.PyAudio()
-                
-                # Open stream
-                stream = p.open(
-                    format=format,
-                    channels=channels,
-                    rate=sample_rate,
-                    input=True,
-                    frames_per_buffer=chunk_size
-                )
-                
-                # Record audio
-                frames = []
-                num_chunks = int(sample_rate * duration / chunk_size)
-                
-                for _ in range(num_chunks):
-                    data = stream.read(chunk_size)
-                    frames.append(data)
-                
-                # Stop and close stream
-                stream.stop_stream()
-                stream.close()
-                p.terminate()
-                
-                # Convert to numpy array
-                audio_data = np.frombuffer(b''.join(frames), dtype=np.int16)
-                audio_data = audio_data.astype(np.float32) / 32768.0
-                
-                return audio_data
-                
-            except ImportError:
-                logger.warning("PyAudio not available. Generating mock audio data.")
-                return self._generate_mock_audio(duration)
-                
-            except Exception as e:
-                logger.warning(f"Audio capture failed: {e}. Using mock audio.")
-                return self._generate_mock_audio(duration)
+            import pyaudio
+            
+            # Audio configuration
+            sample_rate = 16000
+            chunk_size = 1024
+            channels = 1
+            format = pyaudio.paInt16
+            
+            # Initialize PyAudio
+            p = pyaudio.PyAudio()
+            
+            # Open stream
+            stream = p.open(
+                format=format,
+                channels=channels,
+                rate=sample_rate,
+                input=True,
+                frames_per_buffer=chunk_size
+            )
+            
+            # Record audio
+            frames = []
+            num_chunks = int(sample_rate * duration / chunk_size)
+            
+            for _ in range(num_chunks):
+                data = stream.read(chunk_size)
+                frames.append(data)
+            
+            # Stop and close stream
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+            
+            # Convert to numpy array
+            audio_data = np.frombuffer(b''.join(frames), dtype=np.int16)
+            audio_data = audio_data.astype(np.float32) / 32768.0
+            
+            return audio_data
             
         except Exception as e:
             logger.error(f"Speech capture failed: {e}")
-            return self._generate_mock_audio(duration)
-    
-    def _generate_mock_audio(self, duration: float) -> np.ndarray:
-        """Generate mock audio data for testing"""
-        sample_rate = 16000
-        samples = int(duration * sample_rate)
-        
-        # Generate realistic-looking audio with some variation
-        t = np.linspace(0, duration, samples)
-        
-        # Mix of frequencies to simulate speech
-        audio_data = (
-            0.1 * np.sin(2 * np.pi * 200 * t) +  # Low frequency
-            0.05 * np.sin(2 * np.pi * 800 * t) +  # Mid frequency
-            0.02 * np.sin(2 * np.pi * 1600 * t) +  # High frequency
-            0.01 * np.random.normal(0, 1, samples)  # Noise
-        )
-        
-        # Add envelope to make it more speech-like
-        envelope = np.ones(samples)
-        fade_samples = int(0.1 * sample_rate)
-        envelope[:fade_samples] = np.linspace(0, 1, fade_samples)
-        envelope[-fade_samples:] = np.linspace(1, 0, fade_samples)
-        
-        audio_data *= envelope
-        
-        return audio_data.astype(np.float32)
+            raise
     
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get STT performance statistics"""
@@ -654,25 +550,8 @@ class AudioPreprocessor:
     def _resample_audio(self, audio_data: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
         """Resample audio to target sample rate"""
         try:
-            try:
-                import librosa
-                return librosa.resample(audio_data, orig_sr=orig_sr, target_sr=target_sr)
-            except ImportError:
-                logger.warning("librosa not available for resampling. Using simple interpolation.")
-                # Simple resampling using interpolation
-                if orig_sr == target_sr:
-                    return audio_data
-                
-                # Calculate new length
-                new_length = int(len(audio_data) * target_sr / orig_sr)
-                
-                # Use numpy interpolation
-                old_indices = np.linspace(0, len(audio_data), len(audio_data))
-                new_indices = np.linspace(0, len(audio_data), new_length)
-                
-                resampled = np.interp(new_indices, old_indices, audio_data)
-                return resampled.astype(np.float32)
-                
+            import librosa
+            return librosa.resample(audio_data, orig_sr=orig_sr, target_sr=target_sr)
         except Exception as e:
             logger.error(f"Resampling error: {e}")
             return audio_data

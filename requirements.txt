@@ -1,19 +1,11 @@
 # Persian Voice Assistant "استیو" - Core Dependencies
 
-# Flask Backend
-flask==3.0.0
-flask-cors==4.0.0
-
 # Audio Processing
 pyaudio==0.2.11
 librosa==0.10.1
 soundfile==0.12.1
 webrtcvad==2.0.10
 pydub==0.25.1
-
-# Text-to-Speech Engines
-pyttsx3==2.90
-gtts==2.5.1
 
 # Speech Recognition & Synthesis
 openai-whisper==20231117
@@ -61,12 +53,3 @@ requests==2.31.0
 python-dotenv==1.0.0
 colorama==0.4.6
 tqdm==4.66.1
-
-# Audio Processing
-wave
-pygame==2.5.2
-
-# System Integration
-threading
-tempfile
-base64
