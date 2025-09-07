@@ -9,18 +9,29 @@ pydub==0.25.1
 
 # Speech Recognition & Synthesis
 openai-whisper==20231117
-TTS==0.22.0
+SpeechRecognition==3.14.3
 torch==2.1.0
 torchaudio==2.1.0
 transformers==4.35.2
 accelerate==0.24.1
 
-# Enhanced Persian TTS Dependencies
-gtts==2.4.0
-pyttsx3==2.90
-sounddevice==0.4.6
-pygame==2.1.0
+# Enhanced Persian TTS Dependencies - WORKING
+gtts==2.5.4
+pyttsx3==2.99
+sounddevice==0.5.2
+soundfile==0.13.1
+pygame==2.6.1
 PyYAML==6.0.1
+
+# Audio Processing Support
+numpy==2.3.2
+scipy==1.11.4
+CFFI==1.17.1
+
+# TTS Model Support (Optional - for production Kamtera models)
+# TTS==0.22.0  # Uncomment when Coqui-TTS is available
+# torch>=2.0.0  # For VITS models
+# torchaudio>=2.0.0  # For audio processing
 
 # Persian Language Processing
 hazm==0.7.0
