@@ -1,0 +1,267 @@
+diff --git a/requirements.txt b/requirements.txt
+index 1234567..abcdefg 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -62,9 +62,6 @@ mcp==0.1.0
+ 
+ # Data Storage
+ duckdb==0.9.2
+-sqlite3
+ 
+ # Utilities
+-numpy==1.24.3
+-scipy==1.11.4
+ requests==2.31.0
+ python-dotenv==1.0.0
+ colorama==0.4.6
+diff --git a/install_safe.sh b/install_safe.sh
+new file mode 100755
+index 0000000..1234567
+--- /dev/null
++++ b/install_safe.sh
+@@ -0,0 +1,100 @@
++#!/bin/bash
++# Safe Installation Script for Heystive Persian Voice Assistant
++# Compatible with externally-managed Python environments (PEP 668)
++
++set -e
++
++echo "🚀 Heystive Persian Voice Assistant - Safe Installation"
++echo "=" * 60
++
++# Check Python version
++python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
++echo "🐍 Python version: $python_version"
++
++if [ "$(echo "$python_version < 3.8" | bc -l)" -eq 1 ]; then
++    echo "❌ Error: Python 3.8+ required, found $python_version"
++    exit 1
++fi
++
++# Check if we're in a virtual environment
++if [[ "$VIRTUAL_ENV" != "" ]]; then
++    echo "📦 Virtual environment detected: $VIRTUAL_ENV"
++else
++    echo "🌍 System Python detected - creating virtual environment..."
++    
++    # Create virtual environment
++    python3 -m venv .venv
++    echo "✅ Virtual environment created: .venv"
++    echo "📋 To activate: source .venv/bin/activate"
++    echo "   Then re-run this script"
++    exit 0
++fi
++
++echo "🔧 Installing dependencies in virtual environment..."
++
++# Upgrade pip and core tools
++echo "📦 Upgrading pip and core tools..."
++python -m pip install --upgrade pip setuptools wheel
++
++# Install core dependencies first (order matters)
++echo "📦 Installing core dependencies..."
++python -m pip install numpy==2.3.2
++python -m pip install scipy==1.11.4
++
++# Install audio processing dependencies
++echo "🎵 Installing audio dependencies..."
++python -m pip install librosa==0.10.1
++python -m pip install soundfile==0.12.1 || python -m pip install soundfile==0.13.1
++python -m pip install pydub==0.25.1
++python -m pip install pygame==2.6.1
++
++# Install TTS engines
++echo "🎤 Installing TTS engines..."
++python -m pip install pyttsx3==2.99
++python -m pip install gtts==2.5.4
++
++# Install remaining dependencies
++echo "⚙️ Installing remaining dependencies..."
++python -m pip install requests==2.31.0
++python -m pip install python-dotenv==1.0.0
++python -m pip install colorama==0.4.6
++python -m pip install PyYAML==6.0.1
++
++# Try to install PyAudio (may fail without system libraries)
++echo "🔊 Installing audio I/O (may require system libraries)..."
++python -m pip install pyaudio==0.2.11 || {
++    echo "⚠️ PyAudio installation failed"
++    echo "   On Ubuntu/Debian: sudo apt-get install portaudio19-dev"
++    echo "   On macOS: brew install portaudio"
++    echo "   On Windows: Use pre-compiled wheel"
++}
++
++echo ""
++echo "✅ Installation completed!"
++echo "🧪 Test the installation:"
++echo "   python3 test_tts_real.py"
++echo ""
++echo "🚀 Start the voice assistant:"
++echo "   python3 main.py"
++echo ""
+diff --git a/environment_check.py b/environment_check.py
+new file mode 100755
+index 0000000..1234567
+--- /dev/null
++++ b/environment_check.py
+@@ -0,0 +1,300 @@
++#!/usr/bin/env python3
++"""
++Environment Check Script for Heystive Persian Voice Assistant
++Diagnoses Python environment and dependency issues
++"""
++
++import sys
++import os
++import platform
++import subprocess
++from pathlib import Path
++
++def check_python_version():
++    """Check Python version compatibility"""
++    print("🐍 Python Version Check")
++    print("-" * 30)
++    
++    version = sys.version_info
++    print(f"Python version: {version.major}.{version.minor}.{version.micro}")
++    print(f"Python executable: {sys.executable}")
++    print(f"Platform: {platform.platform()}")
++    
++    if version < (3, 8):
++        print("❌ ERROR: Python 3.8+ required")
++        return False
++    elif version >= (3, 8):
++        print("✅ Python version compatible")
++        return True
++
++def check_stdlib_modules():
++    """Check standard library modules"""
++    print("\n📚 Standard Library Check")
++    print("-" * 30)
++    
++    stdlib_modules = {
++        'select': 'System I/O multiplexing',
++        'asyncio': 'Asynchronous programming',
++        'sqlite3': 'Database interface', 
++        'threading': 'Thread-based parallelism',
++        'tempfile': 'Temporary file handling',
++        'base64': 'Base64 encoding/decoding',
++        'pathlib': 'Object-oriented filesystem paths',
++        'json': 'JSON encoder/decoder'
++    }
++    
++    all_available = True
++    for module, description in stdlib_modules.items():
++        try:
++            __import__(module)
++            print(f"✅ {module}: Available ({description})")
++        except ImportError as e:
++            print(f"❌ {module}: Missing - {e}")
++            all_available = False
++    
++    return all_available
++
++def main():
++    """Main diagnostic function"""
++    print("🔍 Heystive Environment Diagnostic Tool")
++    print("=" * 50)
++    
++    checks = [
++        ("Python Version", check_python_version),
++        ("Standard Library", check_stdlib_modules),
++    ]
++    
++    results = {}
++    for check_name, check_func in checks:
++        try:
++            results[check_name] = check_func()
++        except Exception as e:
++            print(f"❌ {check_name} check failed: {e}")
++            results[check_name] = False
++    
++    print("\n" + "=" * 50)
++    print("📊 DIAGNOSTIC SUMMARY")
++    print("=" * 50)
++    
++    passed = sum(1 for result in results.values() if result)
++    total = len(results)
++    
++    for check_name, result in results.items():
++        status = "✅ PASS" if result else "❌ FAIL"
++        print(f"{status} {check_name}")
++    
++    print(f"\nOverall: {passed}/{total} checks passed")
++
++if __name__ == "__main__":
++    main()
+diff --git a/requirements_clean.txt b/requirements_clean.txt
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/requirements_clean.txt
+@@ -0,0 +1,60 @@
++# Persian Voice Assistant "استیو" - Clean Dependencies
++# Optimized for virtual environments and externally-managed Python
++
++# Audio Processing
++pyaudio==0.2.11
++librosa==0.10.1
++soundfile==0.12.1
++webrtcvad==2.0.10
++pydub==0.25.1
++
++# Speech Recognition & Synthesis
++openai-whisper==20231117
++SpeechRecognition==3.14.3
++torch==2.1.0
++torchaudio==2.1.0
++transformers==4.35.2
++accelerate==0.24.1
++
++# Persian TTS Dependencies - WORKING
++gtts==2.5.4
++pyttsx3==2.99
++sounddevice==0.5.2
++pygame==2.6.1
++PyYAML==6.0.1
++
++# Audio Processing Support
++numpy==2.3.2
++scipy==1.11.4
++CFFI==1.17.1
++
++# Persian Language Processing
++hazm==0.7.0
++persian-tools==0.0.7
++arabic-reshaper==3.0.0
++python-bidi==0.4.2
++
++# Hardware Detection & Optimization
++psutil==5.9.6
++GPUtil==1.4.0
++py-cpuinfo==9.0.0
++
++# System Integration
++asyncio-mqtt==0.16.1
++aiohttp==3.9.1
++websockets==12.0
++
++# Smart Home Integration
++python-kasa==0.5.0
++phue==1.1
++paho-mqtt==1.6.1
++
++# MCP & LangGraph
++langgraph==0.0.20
++langchain==0.1.0
++langchain-mcp-adapters==0.1.0
++mcp==0.1.0
++
++# Data Storage
++duckdb==0.9.2
++
++# Utilities
++requests==2.31.0
++python-dotenv==1.0.0
++colorama==0.4.6
++tqdm==4.66.1
