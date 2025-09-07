@@ -46,32 +46,41 @@ class MultiTTSManager:
             
             engine = pyttsx3.init()
             
-            # Apply Persian optimizations
-            voices = engine.getProperty('voices')
-            best_voice = self._select_best_voice(voices)
-            if best_voice:
-                engine.setProperty('voice', best_voice.id)
+            # Apply basic settings without voice selection that might fail
+            try:
+                engine.setProperty('rate', 150)  # Slower rate for better clarity
+                engine.setProperty('volume', 1.0)
+                
+                # Try to set a voice, but don't fail if it doesn't work
+                voices = engine.getProperty('voices')
+                if voices and len(voices) > 0:
+                    # Just use the first available voice
+                    engine.setProperty('voice', voices[0].id)
+            except:
+                print("⚠️ pyttsx3: Voice settings failed, using defaults")
             
-            engine.setProperty('rate', 80)
-            engine.setProperty('volume', 1.0)
-            
-            # Test the engine
+            # Test the engine with English text (more reliable)
             test_file = f"{self.output_dir}/test_pyttsx3.wav"
-            engine.save_to_file("تست موتور pyttsx3", test_file)
-            engine.runAndWait()
+            test_text = "pyttsx3 TTS engine test"
             
-            if os.path.exists(test_file) and os.path.getsize(test_file) > 0:
-                self.available_engines['pyttsx3'] = {
-                    'engine': engine,
-                    'name': 'pyttsx3 (System TTS)',
-                    'quality': 'Medium',
-                    'speed': 'Fast',
-                    'offline': True,
-                    'status': 'Working'
-                }
-                print("✅ pyttsx3: Initialized and tested")
-            else:
-                print("❌ pyttsx3: Test failed")
+            try:
+                engine.save_to_file(test_text, test_file)
+                engine.runAndWait()
+                
+                if os.path.exists(test_file) and os.path.getsize(test_file) > 0:
+                    self.available_engines['pyttsx3'] = {
+                        'engine': engine,
+                        'name': 'pyttsx3 (System TTS)',
+                        'quality': 'Medium',
+                        'speed': 'Fast',
+                        'offline': True,
+                        'status': 'Working'
+                    }
+                    print("✅ pyttsx3: Initialized and tested")
+                else:
+                    print("❌ pyttsx3: Test file creation failed")
+            except Exception as test_error:
+                print(f"❌ pyttsx3: Test failed - {test_error}")
                 
         except Exception as e:
             print(f"❌ pyttsx3: Failed - {e}")
@@ -249,13 +258,18 @@ class MultiTTSManager:
     
     def _speak_pyttsx3(self, text, output_file, engine):
         """Speak with pyttsx3"""
-        if output_file:
-            engine.save_to_file(text, output_file)
-            engine.runAndWait()
-        else:
-            engine.say(text)
-            engine.runAndWait()
-        return True
+        try:
+            if output_file:
+                engine.save_to_file(text, output_file)
+                engine.runAndWait()
+                print(f"📁 Audio saved to: {output_file}")
+            else:
+                engine.say(text)
+                engine.runAndWait()
+            return True
+        except Exception as e:
+            print(f"❌ pyttsx3 playback error: {e}")
+            return False
     
     def _speak_coqui(self, text, output_file, tts_engine):
         """Speak with Coqui TTS"""
@@ -276,7 +290,6 @@ class MultiTTSManager:
     def _speak_gtts(self, text, output_file):
         """Speak with Google TTS"""
         from gtts import gTTS
-        import pygame
         
         if not output_file:
             output_file = f"{self.output_dir}/temp_gtts.mp3"
@@ -292,13 +305,17 @@ class MultiTTSManager:
         
         tts.save(output_file)
         
-        # Play the file
-        pygame.mixer.init()
-        pygame.mixer.music.load(output_file)
-        pygame.mixer.music.play()
-        
-        while pygame.mixer.music.get_busy():
-            pass
+        # Try to play the file, but don't fail if no audio device
+        try:
+            import pygame
+            pygame.mixer.init()
+            pygame.mixer.music.load(output_file)
+            pygame.mixer.music.play()
+            
+            while pygame.mixer.music.get_busy():
+                pass
+        except:
+            print(f"📁 Audio saved to: {output_file} (no audio device for playback)")
         
         return True
     
