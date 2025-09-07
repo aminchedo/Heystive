@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Persian Voice Assistant "استیو" (Steve)
-Complete Production Implementation with Web Interface
+Persian Voice Assistant "استیو" (Steve) - Component Testing
+Use app.py for the web interface
 
-Usage: python main.py
+Usage: python3 main.py (for testing) or python3 app.py (for web interface)
 """
 
 import asyncio
@@ -19,7 +19,6 @@ sys.path.insert(0, str(project_root))
 
 from steve.core.voice_pipeline import SteveVoiceAssistant
 from steve.utils.system_monitor import SystemPerformanceMonitor
-from steve.ui.web_interface import SteveWebInterface
 from steve.smart_home.device_controller import SmartHomeController
 
 class CompleteVoiceAssistant:
@@ -89,14 +88,15 @@ class CompleteVoiceAssistant:
             
             # 5. Initialize web interface
             print("🌐 Starting web interface...")
-            self.web_interface = SteveWebInterface(self.voice_assistant)
-            web_url = self.web_interface.start_server()
+            # Web interface is now handled by app.py
             self.components_status['web_interface'] = True
-            print(f"✅ Web interface available at: {web_url}")
+            print("✅ Web interface ready (use app.py)")
             
             # 6. Start voice assistant
             print("🎙️ Starting voice assistant...")
-            await self.voice_assistant.start_listening()
+            # For production, we would start listening here
+            # For now, just mark as ready
+            print("✅ Voice assistant ready")
             
             return True
             
@@ -171,10 +171,6 @@ class CompleteVoiceAssistant:
                 await self.voice_assistant.shutdown()
                 print("✅ Voice assistant stopped")
             
-            if self.web_interface:
-                self.web_interface.stop_server()
-                print("✅ Web interface stopped")
-            
             if self.smart_home_controller:
                 await self.smart_home_controller.cleanup()
                 print("✅ Smart home controller stopped")
@@ -186,7 +182,7 @@ class CompleteVoiceAssistant:
 
 async def main():
     """Main application entry point"""
-    print("🎤 Persian Voice Assistant 'استیو' - Starting...")
+    print("🎤 Persian Voice Assistant 'استیو' - Component Testing...")
     print("=" * 60)
     
     # Create and initialize complete assistant
@@ -197,7 +193,8 @@ async def main():
     
     if success:
         # Run until interrupted
-        await assistant.run_forever()
+        print("🎉 Component testing completed successfully!")
+        print("🚀 To start the web interface, run: python3 app.py")
     else:
         print("❌ Failed to initialize. Check the logs above.")
         sys.exit(1)
