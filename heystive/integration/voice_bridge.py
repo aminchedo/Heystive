@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-HEYSTIVE VOICE BRIDGE MODULE - STEP 3 IMPLEMENTATION
-Bridge between new voice capabilities and existing Heystive logic
-PRESERVES ALL EXISTING FUNCTIONALITY while adding voice capabilities
-ONLY PROCEED AFTER BOTH TTS AND STT ARE VERIFIED WORKING
+HEYSTIVE VOICE BRIDGE MODULE - ENHANCED PERSIAN TTS INTEGRATION
+Bridge between enhanced Persian TTS capabilities and existing Heystive logic
+PRESERVES ALL EXISTING FUNCTIONALITY while adding advanced voice capabilities
 """
 
 import sys
@@ -11,46 +10,144 @@ import os
 from pathlib import Path
 from datetime import datetime
 import importlib.util
+import asyncio
+from typing import Optional, Dict, Any
 
 # Add workspace to path
 sys.path.insert(0, '/workspace')
 
-from heystive.voice.multi_tts_manager import MultiTTSManager
+from heystive.voice.persian_multi_tts_manager import PersianMultiTTSManager
+from heystive.voice.voice_config import VoiceConfigManager
 from heystive.voice.persian_stt import PersianSpeechRecognizer
 
 class HeystiveVoiceBridge:
     """
-    Bridge between new voice capabilities and existing Heystive logic
-    PRESERVES ALL EXISTING FUNCTIONALITY
+    Enhanced bridge between Persian TTS capabilities and existing Heystive logic
+    PRESERVES ALL EXISTING FUNCTIONALITY while adding advanced voice features
     """
     
-    def __init__(self):
-        print("🚀 Initializing Heystive Voice Bridge...")
+    def __init__(self, config_path: Optional[str] = None):
+        print("🚀 Initializing Enhanced Heystive Voice Bridge...")
+        
+        # Initialize configuration manager
+        self.config_manager = VoiceConfigManager(config_path)
+        
+        # Check if voice is enabled
+        if not self.config_manager.get_voice_enabled():
+            print("⚠️ Voice is disabled in configuration")
+            self.tts_manager = None
+            self.stt = None
+            return
         
         # Initialize voice components
-        print("🔧 Setting up voice components...")
-        self.tts_manager = MultiTTSManager()
+        print("🔧 Setting up enhanced voice components...")
+        self.tts_manager = PersianMultiTTSManager()
         self.stt = PersianSpeechRecognizer()
         
         # Try to import and preserve existing Heystive modules
         self.existing_heystive = self._discover_existing_modules()
         
-        print("✅ Heystive Voice Bridge initialized successfully!")
+        # Set up voice preferences
+        self._apply_user_preferences()
+        
+        print("✅ Enhanced Heystive Voice Bridge initialized successfully!")
     
-    def change_voice_engine(self, engine_name):
+    def _apply_user_preferences(self):
+        """Apply user preferences from configuration"""
+        if not self.tts_manager:
+            return
+            
+        preferences = self.config_manager.get_user_preferences()
+        
+        # Set preferred voice engine
+        preferred_voice = preferences.get('preferred_voice')
+        if preferred_voice and preferred_voice in self.tts_manager.engines:
+            self.tts_manager.switch_engine(preferred_voice)
+            print(f"🎯 Applied preferred voice: {preferred_voice}")
+    
+    def change_voice_engine(self, engine_name: str) -> bool:
         """Allow user to change TTS engine"""
-        return self.tts_manager.switch_engine(engine_name)
+        if not self.tts_manager:
+            print("❌ Voice system not available")
+            return False
+            
+        success = self.tts_manager.switch_engine(engine_name)
+        if success:
+            # Update user preference
+            self.config_manager.set_user_preference('preferred_voice', engine_name)
+        return success
     
-    def list_voice_options(self):
+    def list_voice_options(self) -> Dict[str, Dict]:
         """Show available voice engines to user"""
-        return self.tts_manager.list_available_engines()
+        if not self.tts_manager:
+            return {}
+        return self.tts_manager.list_engines()
     
-    def get_current_voice_engine(self):
+    def get_current_voice_engine(self) -> Optional[Dict]:
         """Get currently selected voice engine info"""
-        if self.tts_manager.current_engine:
-            current = self.tts_manager.current_engine
-            return self.tts_manager.available_engines[current]
-        return None
+        if not self.tts_manager:
+            return None
+        return self.tts_manager.get_current_engine_info()
+    
+    def speak_persian(self, text: str, engine_name: Optional[str] = None, save_file: bool = True) -> bool:
+        """Speak Persian text using the TTS system"""
+        if not self.tts_manager:
+            print("❌ Voice system not available")
+            return False
+        
+        # Get user preferences
+        preferences = self.config_manager.get_user_preferences()
+        save_audio = preferences.get('save_audio_files', True) and save_file
+        
+        # Generate output file if saving is enabled
+        output_file = None
+        if save_audio:
+            output_dir = self.config_manager.get_output_directory()
+            timestamp = int(datetime.now().timestamp())
+            output_file = f"{output_dir}/heystive_response_{timestamp}.wav"
+        
+        return self.tts_manager.speak_persian(text, engine_name, output_file)
+    
+    def test_voice_engines(self) -> Dict[str, bool]:
+        """Test all available voice engines"""
+        if not self.tts_manager:
+            print("❌ Voice system not available")
+            return {}
+        return self.tts_manager.test_all_engines()
+    
+    def get_voice_config(self) -> Dict[str, Any]:
+        """Get current voice configuration"""
+        return {
+            'enabled': self.config_manager.get_voice_enabled(),
+            'default_engine': self.config_manager.get_default_engine(),
+            'current_engine': self.get_current_voice_engine(),
+            'available_engines': self.list_voice_options(),
+            'audio_settings': self.config_manager.get_audio_settings(),
+            'user_preferences': self.config_manager.get_user_preferences()
+        }
+    
+    def update_voice_settings(self, settings: Dict[str, Any]) -> bool:
+        """Update voice settings"""
+        try:
+            for key, value in settings.items():
+                if key == 'enabled':
+                    self.config_manager.set_voice_enabled(value)
+                elif key == 'default_engine':
+                    self.config_manager.set_default_engine(value)
+                elif key == 'preferred_voice':
+                    self.config_manager.set_user_preference('preferred_voice', value)
+                    if self.tts_manager:
+                        self.tts_manager.switch_engine(value)
+                elif key.startswith('audio_'):
+                    audio_setting = key.replace('audio_', '')
+                    self.config_manager.set_audio_setting(audio_setting, value)
+                else:
+                    self.config_manager.set_user_preference(key, value)
+            
+            return True
+        except Exception as e:
+            print(f"❌ Failed to update voice settings: {e}")
+            return False
     
     def _discover_existing_modules(self):
         """Find and preserve existing Heystive functionality."""
@@ -121,6 +218,21 @@ class HeystiveVoiceBridge:
         response = self._generate_builtin_response(audio_input)
         print(f"   ✅ Generated response: '{response}'")
         return response
+    
+    def process_and_speak(self, audio_input: str, engine_name: Optional[str] = None) -> bool:
+        """
+        Process voice command and speak the response
+        Returns True if both processing and speaking were successful
+        """
+        if not self.tts_manager:
+            print("❌ Voice system not available")
+            return False
+        
+        # Process the command
+        response = self.process_voice_command(audio_input)
+        
+        # Speak the response
+        return self.speak_persian(response, engine_name)
     
     def _try_existing_modules(self, text: str) -> str:
         """Try to process command using existing modules."""
@@ -236,7 +348,7 @@ class HeystiveVoiceBridge:
                 if any(exit_word in user_input.lower() for exit_word in ['exit', 'خداحافظ', 'خدافظ', 'goodbye']):
                     response = "خداحافظ! امیدوارم تجربه خوبی با استیو داشته باشید."
                     print(f"🤖 پاسخ: {response}")
-                    self.tts_manager.speak_with_current_engine(response, f"heystive_audio_output/goodbye.wav")
+                    self.speak_persian(response)
                     break
                 
                 # Process command
@@ -245,9 +357,8 @@ class HeystiveVoiceBridge:
                 # Speak response
                 print(f"🤖 پاسخ: {response}")
                 
-                # Actually generate speech
-                audio_file = f"heystive_audio_output/response_{interaction_count}.wav"
-                success = self.tts_manager.speak_with_current_engine(response, audio_file)
+                # Actually generate speech using enhanced TTS
+                success = self.speak_persian(response)
                 if success:
                     print("   ✅ پاسخ صوتی تولید شد")
                 else:
@@ -259,7 +370,7 @@ class HeystiveVoiceBridge:
             except Exception as e:
                 print(f"❌ خطا: {e}")
                 error_response = "متاسفم، خطایی رخ داد"
-                self.tts_manager.speak_with_current_engine(error_response, "heystive_audio_output/error.wav")
+                self.speak_persian(error_response)
     
     def test_complete_integration(self):
         """Test the complete voice integration."""
@@ -274,20 +385,19 @@ class HeystiveVoiceBridge:
             "existing_integration": False
         }
         
-        # Test 1: TTS functionality
-        print("🔊 Test 1: Multi-TTS System")
+        # Test 1: Enhanced TTS functionality
+        print("🔊 Test 1: Enhanced Persian Multi-TTS System")
         try:
-            test_text = "این یک تست کامل سیستم صوتی چندگانه استیو است"
-            test_file = "heystive_audio_output/integration_test.wav"
-            success = self.tts_manager.speak_with_current_engine(test_text, test_file)
+            test_text = "این یک تست کامل سیستم صوتی چندگانه HeyStive است"
+            success = self.speak_persian(test_text)
             test_results["tts_working"] = success
-            print(f"   {'✅' if success else '❌'} Multi-TTS: {'WORKING' if success else 'FAILED'}")
+            print(f"   {'✅' if success else '❌'} Enhanced Multi-TTS: {'WORKING' if success else 'FAILED'}")
             if success:
-                current_engine = self.tts_manager.current_engine
-                engine_name = self.tts_manager.available_engines[current_engine]['name']
-                print(f"      Using: {engine_name}")
+                current_info = self.get_current_voice_engine()
+                if current_info:
+                    print(f"      Using: {current_info['name']} ({current_info['quality']} quality)")
         except Exception as e:
-            print(f"   ❌ Multi-TTS Error: {e}")
+            print(f"   ❌ Enhanced Multi-TTS Error: {e}")
         
         # Test 2: STT functionality
         print("\n🎤 Test 2: Speech-to-Text")
@@ -316,9 +426,7 @@ class HeystiveVoiceBridge:
         print("\n🔊 Test 4: Voice Response Generation")
         try:
             test_command = "ساعت چنده؟"
-            response = self.process_voice_command(test_command)
-            test_file = "heystive_audio_output/response_test.wav"
-            voice_success = self.tts_manager.speak_with_current_engine(response, test_file)
+            voice_success = self.process_and_speak(test_command)
             test_results["voice_responses"] = voice_success
             print(f"   {'✅' if voice_success else '❌'} Voice Responses: {'WORKING' if voice_success else 'FAILED'}")
         except Exception as e:
