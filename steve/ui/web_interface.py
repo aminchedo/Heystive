@@ -36,6 +36,9 @@ class SteveWebInterface:
         
         logger.info("Steve Web Interface initialized")
         
+        # NEW: Add monitoring endpoints (safe addition)
+        self._add_monitoring_endpoints()
+        
     def setup_routes(self):
         """Setup all web interface routes"""
         
@@ -48,6 +51,11 @@ class SteveWebInterface:
         def legacy_dashboard():
             """Legacy dashboard for compatibility"""
             return render_template('dashboard.html')
+        
+        @self.app.route('/enhanced')
+        def enhanced_dashboard():
+            """NEW: Enhanced dashboard with monitoring features"""
+            return render_template('enhanced-dashboard.html')
             
         @self.app.route('/api/status')
         def get_system_status():
@@ -256,3 +264,17 @@ class SteveWebInterface:
             'server_thread_alive': self.server_thread.is_alive() if self.server_thread else False,
             'voice_assistant_connected': self.voice_assistant is not None
         }
+    
+    def _add_monitoring_endpoints(self):
+        """
+        NEW: Add monitoring endpoints without breaking existing APIs
+        Safe addition that enhances functionality
+        """
+        try:
+            from steve.utils.monitoring_endpoints import register_monitoring_routes
+            register_monitoring_routes(self.app)
+            logger.info("Enhanced monitoring endpoints added successfully")
+        except ImportError as e:
+            logger.warning(f"Monitoring endpoints not available: {e}")
+        except Exception as e:
+            logger.error(f"Failed to add monitoring endpoints: {e}")
