@@ -41,7 +41,12 @@ class SteveWebInterface:
         
         @self.app.route('/')
         def dashboard():
-            """Main dashboard page"""
+            """Main professional dashboard page"""
+            return render_template('professional-dashboard.html')
+        
+        @self.app.route('/legacy')
+        def legacy_dashboard():
+            """Legacy dashboard for compatibility"""
             return render_template('dashboard.html')
             
         @self.app.route('/api/status')
