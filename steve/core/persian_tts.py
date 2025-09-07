@@ -528,6 +528,7 @@ class ElitePersianTTS:
                 
                 # Play using system audio player
                 import subprocess
+                # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
                 subprocess.run(['aplay', tmp_file.name], check=True)
                 
                 # Clean up

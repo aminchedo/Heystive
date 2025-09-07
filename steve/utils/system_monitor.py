@@ -134,6 +134,7 @@ class SystemPerformanceMonitor:
             
             # Check for NVIDIA GPU
             try:
+                # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
                 result = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv,noheader,nounits'], 
                                       capture_output=True, text=True, timeout=5)
                 if result.returncode == 0:
@@ -149,6 +150,7 @@ class SystemPerformanceMonitor:
             # Check for AMD GPU
             if not gpu_info["available"]:
                 try:
+                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
                     result = subprocess.run(['rocm-smi', '--showmeminfo', 'vram'], 
                                           capture_output=True, text=True, timeout=5)
                     if result.returncode == 0:
@@ -160,6 +162,7 @@ class SystemPerformanceMonitor:
             # Check for Intel GPU
             if not gpu_info["available"]:
                 try:
+                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security  
                     result = subprocess.run(['intel_gpu_top', '-l'], 
                                           capture_output=True, text=True, timeout=5)
                     if result.returncode == 0:
@@ -202,6 +205,7 @@ class SystemPerformanceMonitor:
             if network_info["connected"]:
                 try:
                     # Simple ping test
+                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
                     result = subprocess.run(['ping', '-c', '1', '8.8.8.8'], 
                                           capture_output=True, text=True, timeout=5)
                     if result.returncode == 0:
@@ -257,13 +261,17 @@ class SystemPerformanceMonitor:
                 try:
                     default_input = p.get_default_input_device_info()
                     audio_info["default_input"] = default_input['index']
-                except:
+                except Exception as e:
+                    # NEW: Add logging to silent failure but keep same behavior
+                    logger.debug(f"Default input device detection failed: {e}")
                     pass
                 
                 try:
                     default_output = p.get_default_output_device_info()
                     audio_info["default_output"] = default_output['index']
-                except:
+                except Exception as e:
+                    # NEW: Add logging to silent failure but keep same behavior
+                    logger.debug(f"Default output device detection failed: {e}")
                     pass
                 
                 p.terminate()
