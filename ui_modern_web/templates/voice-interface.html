@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}رابط صوتی - دستیار صوتی استیو{% endblock %}
+{% block page_title %}رابط صوتی{% endblock %}
+
+{% block extra_css %}
+<style>
+    .voice-interface {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .voice-section {
+        margin-bottom: var(--space-8);
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-4);
+        margin: var(--space-6) 0;
+    }
+    
+    .quick-action {
+        background: var(--surface);
+        border: 1px solid var(--outline);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--persian-blue);
+    }
+    
+    .quick-action-icon {
+        font-size: var(--font-3xl);
+        margin-bottom: var(--space-2);
+    }
+    
+    .quick-action-title {
+        font-weight: 600;
+        margin-bottom: var(--space-1);
+    }
+    
+    .quick-action-desc {
+        font-size: var(--font-sm);
+        color: #718096;
+    }
+    
+    .chat-section {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-md);
+        margin-top: var(--space-6);
+    }
+    
+    .chat-input-container {
+        display: flex;
+        gap: var(--space-3);
+        align-items: flex-end;
+        margin-top: var(--space-4);
+    }
+    
+    .chat-input-wrapper {
+        flex: 1;
+        position: relative;
+    }
+    
+    #chat-input {
+        width: 100%;
+        min-height: 50px;
+        max-height: 150px;
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--outline);
+        border-radius: var(--radius-lg);
+        font-family: 'Vazir', sans-serif;
+        font-size: var(--font-base);
+        resize: vertical;
+        direction: rtl;
+        text-align: right;
+    }
+    
+    #chat-input:focus {
+        outline: none;
+        border-color: var(--persian-blue);
+        box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+    }
+    
+    .voice-level-container {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        margin: var(--space-4) 0;
+        border: 1px solid var(--outline);
+    }
+    
+    .voice-level-label {
+        font-size: var(--font-sm);
+        color: #718096;
+        margin-bottom: var(--space-2);
+        text-align: center;
+    }
+    
+    #voice-level {
+        width: 100%;
+        height: 8px;
+        background: var(--outline);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    #voice-level::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--success), var(--warning), var(--error));
+        border-radius: var(--radius-sm);
+        transition: width var(--transition-fast);
+    }
+    
+    .wake-word-indicator {
+        position: fixed;
+        top: var(--space-4);
+        left: var(--space-4);
+        background: var(--surface);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        z-index: 1000;
+        opacity: 0.9;
+        transition: all var(--transition-normal);
+        font-size: var(--font-sm);
+    }
+    
+    .wake-word-indicator.listening {
+        background: var(--success);
+        color: white;
+    }
+    
+    .wake-word-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+    }
+    
+    .wake-word-indicator.listening .wake-word-dot {
+        background: white;
+        animation: pulse 1s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voice-interface">
+    <!-- Wake Word Indicator -->
+    <div id="wake-word-indicator" class="wake-word-indicator">
+        <div class="wake-word-dot"></div>
+        <span class="wake-word-text">در انتظار کلمه بیدار کننده</span>
+    </div>
+    
+    <!-- Main Voice Control Section -->
+    <section class="voice-section">
+        <div class="voice-control-panel animate-fadeInUp">
+            <!-- Voice Status -->
+            <div class="voice-status">
+                <h2 class="voice-status-text md-headline-medium text-center">آماده برای ضبط</h2>
+                <p class="voice-status-subtext text-center" id="voice-status">
+                    برای شروع ضبط صوت، دکمه میکروفن را فشار دهید یا کلید فضا را بزنید
+                </p>
+            </div>
+            
+            <!-- Voice Button -->
+            <div class="text-center">
+                <button id="voice-button" class="voice-button md-fab-large" title="شروع ضبط صوت (فضا)">
+                    <span class="voice-button-icon">🎤</span>
+                </button>
+            </div>
+            
+            <!-- Voice Level Indicator -->
+            <div class="voice-level-container">
+                <div class="voice-level-label">سطح صوت</div>
+                <div id="voice-level" class="voice-level"></div>
+            </div>
+            
+            <!-- Voice Visualizer -->
+            <div id="voice-visualizer" class="voice-visualizer"></div>
+            
+            <!-- Voice Commands Help -->
+            <div class="voice-commands">
+                <h3 class="voice-commands-title">دستورات صوتی</h3>
+                <ul class="voice-commands-list">
+                    <li>سلام استیو - شروع گفتگو</li>
+                    <li>چه خبر؟ - دریافت اخبار</li>
+                    <li>هوا چطوره؟ - وضعیت آب و هوا</li>
+                    <li>ساعت چنده؟ - زمان فعلی</li>
+                    <li>موسیقی پخش کن - پخش موسیقی</li>
+                    <li>خاموش کن - خاتمه</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Quick Actions -->
+    <section class="voice-section">
+        <h2 class="md-headline-small mb-6">عملیات سریع</h2>
+        <div class="quick-actions stagger-children">
+            <div class="quick-action" onclick="sendQuickCommand('time')">
+                <div class="quick-action-icon">🕐</div>
+                <div class="quick-action-title">زمان فعلی</div>
+                <div class="quick-action-desc">نمایش ساعت و تاریخ</div>
+            </div>
+            
+            <div class="quick-action" onclick="sendQuickCommand('weather')">
+                <div class="quick-action-icon">🌤️</div>
+                <div class="quick-action-title">آب و هوا</div>
+                <div class="quick-action-desc">وضعیت آب و هوا</div>
+            </div>
+            
+            <div class="quick-action" onclick="sendQuickCommand('news')">
+                <div class="quick-action-icon">📰</div>
+                <div class="quick-action-title">اخبار</div>
+                <div class="quick-action-desc">آخرین اخبار</div>
+            </div>
+            
+            <div class="quick-action" onclick="sendQuickCommand('music')">
+                <div class="quick-action-icon">🎵</div>
+                <div class="quick-action-title">موسیقی</div>
+                <div class="quick-action-desc">پخش موسیقی</div>
+            </div>
+            
+            <div class="quick-action" onclick="sendQuickCommand('calculator')">
+                <div class="quick-action-icon">🧮</div>
+                <div class="quick-action-title">ماشین حساب</div>
+                <div class="quick-action-desc">انجام محاسبات</div>
+            </div>
+            
+            <div class="quick-action" onclick="sendQuickCommand('help')">
+                <div class="quick-action-icon">❓</div>
+                <div class="quick-action-title">راهنما</div>
+                <div class="quick-action-desc">دریافت کمک</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Voice Response Display -->
+    <section class="voice-section">
+        <div id="voice-response" class="voice-response card" style="display: none;">
+            <h3 class="md-title-medium mb-4">پاسخ استیو</h3>
+            <div id="voice-response-text" class="voice-response-text">
+                در انتظار پاسخ...
+            </div>
+            <div class="voice-response-actions">
+                <button class="voice-response-action" onclick="playLastResponse()">
+                    <span>🔊</span> پخش مجدد
+                </button>
+                <button class="voice-response-action" onclick="copyResponse()">
+                    <span>📋</span> کپی متن
+                </button>
+                <button class="voice-response-action" onclick="shareResponse()">
+                    <span>📤</span> اشتراک‌گذاری
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Chat Interface -->
+    <section class="chat-section animate-fadeInUp" style="animation-delay: 0.3s;">
+        <h2 class="md-headline-small mb-4">گفتگوی متنی</h2>
+        
+        <!-- Chat Messages -->
+        <div id="chat-container" class="voice-chat"></div>
+        
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="chat-input" 
+                    placeholder="پیام خود را بنویسید..."
+                    rows="1"
+                ></textarea>
+            </div>
+            <button id="chat-send" class="btn btn-primary" title="ارسال پیام (Enter)">
+                <span>📤</span>
+                ارسال
+            </button>
+        </div>
+        
+        <div class="text-center mt-4">
+            <small class="text-muted">
+                برای ارسال پیام Enter و برای خط جدید Shift+Enter را بزنید
+            </small>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Quick command functions
+    function sendQuickCommand(command) {
+        const commands = {
+            'time': 'ساعت چنده؟',
+            'weather': 'هوا چطوره؟',
+            'news': 'چه خبر؟',
+            'music': 'موسیقی پخش کن',
+            'calculator': 'ماشین حساب',
+            'help': 'راهنمایی بده'
+        };
+        
+        const message = commands[command] || command;
+        
+        if (window.heystiveApp) {
+            // Add to chat
+            window.heystiveApp.addChatMessage(message, 'user');
+            
+            // Send to assistant
+            if (window.heystiveApp.websocketClient && window.heystiveApp.websocketClient.isConnected) {
+                window.heystiveApp.websocketClient.sendTextMessage(message);
+            } else {
+                // Fallback to HTTP API
+                fetch('/api/text-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (window.heystiveApp) {
+                        window.heystiveApp.displayTextResponse(result);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending quick command:', error);
+                    showNotification('خطا در ارسال دستور', 'error');
+                });
+            }
+        }
+    }
+    
+    // Voice response functions
+    let lastAudioUrl = null;
+    let lastResponseText = '';
+    
+    function playLastResponse() {
+        if (lastAudioUrl) {
+            const audio = new Audio(lastAudioUrl);
+            audio.play().catch(error => {
+                console.warn('Failed to play audio:', error);
+                showNotification('خطا در پخش صوت', 'error');
+            });
+        } else {
+            showNotification('صوتی برای پخش وجود ندارد', 'warning');
+        }
+    }
+    
+    function copyResponse() {
+        if (lastResponseText) {
+            navigator.clipboard.writeText(lastResponseText).then(() => {
+                showNotification('متن کپی شد', 'success');
+            }).catch(error => {
+                console.warn('Failed to copy text:', error);
+                showNotification('خطا در کپی متن', 'error');
+            });
+        }
+    }
+    
+    function shareResponse() {
+        if (navigator.share && lastResponseText) {
+            navigator.share({
+                title: 'پاسخ استیو',
+                text: lastResponseText,
+                url: window.location.href
+            }).catch(error => {
+                console.warn('Failed to share:', error);
+            });
+        } else {
+            // Fallback - copy to clipboard
+            copyResponse();
+        }
+    }
+    
+    // Enhanced app initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-resize chat input
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+        }
+        
+        // Update voice response display
+        if (window.heystiveApp) {
+            const originalDisplayResponse = window.heystiveApp.displayVoiceResponse;
+            window.heystiveApp.displayVoiceResponse = function(result) {
+                originalDisplayResponse.call(this, result);
+                
+                // Update response display
+                const responseDiv = document.getElementById('voice-response');
+                const responseText = document.getElementById('voice-response-text');
+                
+                if (responseDiv && responseText && result.response_text) {
+                    lastResponseText = result.response_text;
+                    lastAudioUrl = result.audio_url;
+                    
+                    responseText.textContent = result.response_text;
+                    responseDiv.style.display = 'block';
+                    responseDiv.classList.add('animate-fadeInUp');
+                }
+            };
+        }
+        
+        // Wake word indicator simulation
+        const wakeWordIndicator = document.getElementById('wake-word-indicator');
+        if (wakeWordIndicator) {
+            // Simulate wake word detection
+            setInterval(() => {
+                const isListening = Math.random() > 0.8; // 20% chance
+                if (isListening) {
+                    wakeWordIndicator.classList.add('listening');
+                    wakeWordIndicator.querySelector('.wake-word-text').textContent = 'در حال گوش دادن...';
+                    
+                    setTimeout(() => {
+                        wakeWordIndicator.classList.remove('listening');
+                        wakeWordIndicator.querySelector('.wake-word-text').textContent = 'در انتظار کلمه بیدار کننده';
+                    }, 2000);
+                }
+            }, 5000);
+        }
+        
+        // Voice level visualization
+        const voiceLevelElement = document.getElementById('voice-level');
+        if (voiceLevelElement && window.heystiveApp) {
+            const originalHandleVolumeChange = window.heystiveApp.handleVolumeChange;
+            window.heystiveApp.handleVolumeChange = function(level) {
+                originalHandleVolumeChange.call(this, level);
+                
+                // Update voice level bar
+                const percentage = Math.min(level * 2, 100);
+                voiceLevelElement.style.setProperty('--voice-level', `${percentage}%`);
+            };
+        }
+        
+        // Add CSS for voice level animation
+        const style = document.createElement('style');
+        style.textContent = `
+            #voice-level::after {
+                width: var(--voice-level, 0%);
+            }
+        `;
+        document.head.appendChild(style);
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // F1 for help
+        if (e.key === 'F1') {
+            e.preventDefault();
+            sendQuickCommand('help');
+        }
+        
+        // Ctrl+T for time
+        if (e.ctrlKey && e.key === 't') {
+            e.preventDefault();
+            sendQuickCommand('time');
+        }
+        
+        // Ctrl+W for weather
+        if (e.ctrlKey && e.key === 'w') {
+            e.preventDefault();
+            sendQuickCommand('weather');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="دستیار صوتی فارسی استیو - رابط کاربری مدرن">
+    <meta name="keywords" content="دستیار صوتی, فارسی, استیو, هوش مصنوعی">
+    <meta name="author" content="Heystive Team">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1565C0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="استیو">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/static/assets/icons/apple-touch-icon.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <title>{% block title %}دستیار صوتی استیو{% endblock %}</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/persian-rtl.css">
+    <link rel="stylesheet" href="/static/css/material-design.css">
+    <link rel="stylesheet" href="/static/css/voice-controls.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    
+    <!-- Additional CSS -->
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Page-specific styles */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-header {
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .app-main {
+            flex: 1;
+            padding: var(--space-6);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .app-footer {
+            background: var(--surface);
+            border-top: 1px solid var(--outline);
+            padding: var(--space-4);
+            text-align: center;
+            color: #718096;
+            font-size: var(--font-sm);
+        }
+        
+        .status-bar {
+            background: rgba(21, 101, 192, 0.1);
+            padding: var(--space-2) var(--space-4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--font-sm);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-content {
+            text-align: center;
+            padding: var(--space-8);
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--outline);
+            border-top: 4px solid var(--persian-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-4);
+        }
+        
+        @media (max-width: 768px) {
+            .app-main {
+                padding: var(--space-4);
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="md-title-medium">در حال بارگذاری...</div>
+            <div class="md-body-small text-muted">لطفاً صبر کنید</div>
+        </div>
+    </div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <!-- Top App Bar -->
+            <div class="md-top-app-bar">
+                <button class="md-icon-button" id="menu-button" title="منو">
+                    <span>☰</span>
+                </button>
+                
+                <h1 class="md-top-app-bar-title">
+                    {% block page_title %}دستیار صوتی استیو{% endblock %}
+                </h1>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Connection Status -->
+                    <span id="connection-status" class="badge badge-error">قطع شده</span>
+                    
+                    <!-- Settings Button -->
+                    <button class="md-icon-button" onclick="window.location.href='/settings'" title="تنظیمات">
+                        <span>⚙️</span>
+                    </button>
+                    
+                    <!-- Dashboard Button -->
+                    <button class="md-icon-button" onclick="window.location.href='/dashboard'" title="داشبورد">
+                        <span>📊</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>⏰</span>
+                    <span id="current-time" data-persian-numbers></span>
+                </div>
+                
+                <div class="status-item">
+                    <span>💻</span>
+                    <span id="system-status">در حال بارگذاری...</span>
+                </div>
+                
+                <div class="status-item">
+                    <span>🗣️</span>
+                    <span id="current-voice">پیش‌فرض</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="app-main">
+            {% block content %}
+            <div class="text-center p-8">
+                <h2 class="md-headline-medium mb-4">خوش آمدید</h2>
+                <p class="md-body-large text-muted">محتوای صفحه اینجا نمایش داده می‌شود</p>
+            </div>
+            {% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="container">
+                <p data-persian>
+                    © ۱۴۰۳ دستیار صوتی استیو - تمامی حقوق محفوظ است
+                </p>
+                <div class="flex justify-center items-center gap-4 mt-2">
+                    <a href="#" class="text-sm text-muted hover:text-primary">درباره ما</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" class="text-sm text-muted hover:text-primary">حریم خصوصی</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" class="text-sm text-muted hover:text-primary">پشتیبانی</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Navigation Menu (Mobile) -->
+    <div id="mobile-menu" class="md-navigation-bar" style="display: none;">
+        <div class="md-navigation-item" onclick="window.location.href='/'">
+            <div class="md-navigation-icon">🎤</div>
+            <div class="md-navigation-label">صوتی</div>
+        </div>
+        <div class="md-navigation-item" onclick="window.location.href='/dashboard'">
+            <div class="md-navigation-icon">📊</div>
+            <div class="md-navigation-label">داشبورد</div>
+        </div>
+        <div class="md-navigation-item" onclick="window.location.href='/settings'">
+            <div class="md-navigation-icon">⚙️</div>
+            <div class="md-navigation-label">تنظیمات</div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/static/js/persian-utils.js"></script>
+    <script src="/static/js/voice-recorder.js"></script>
+    <script src="/static/js/websocket-client.js"></script>
+    <script src="/static/js/main.js"></script>
+    
+    <!-- Additional JavaScript -->
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Base JavaScript -->
+    <script>
+        // Initialize common functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update current time
+            function updateTime() {
+                const now = new Date();
+                const persianUtils = new PersianUtils();
+                const timeElement = document.getElementById('current-time');
+                if (timeElement) {
+                    timeElement.textContent = persianUtils.formatTime(now);
+                }
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Mobile menu toggle
+            const menuButton = document.getElementById('menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (menuButton && mobileMenu) {
+                menuButton.addEventListener('click', function() {
+                    const isVisible = mobileMenu.style.display !== 'none';
+                    mobileMenu.style.display = isVisible ? 'none' : 'flex';
+                });
+            }
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (mobileMenu && !mobileMenu.contains(e.target) && !menuButton.contains(e.target)) {
+                    mobileMenu.style.display = 'none';
+                }
+            });
+            
+            // Apply Persian formatting
+            if (window.PersianUtils) {
+                const persianUtils = new PersianUtils();
+                const formatter = new PersianFormatter();
+                
+                // Format Persian text elements
+                document.querySelectorAll('[data-persian]').forEach(element => {
+                    element.textContent = formatter.formatForDisplay(element.textContent);
+                });
+                
+                // Format Persian numbers
+                document.querySelectorAll('[data-persian-numbers]').forEach(element => {
+                    element.textContent = persianUtils.toPersianDigits(element.textContent);
+                });
+            }
+            
+            // Hide loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            }
+        });
+        
+        // Show loading overlay function
+        function showLoading(message = 'در حال بارگذاری...') {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.querySelector('.md-title-medium').textContent = message;
+                overlay.style.display = 'flex';
+            }
+        }
+        
+        // Hide loading overlay function
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `md-snackbar animate-fadeInUp`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button class="md-snackbar-action" onclick="this.parentElement.remove()">بستن</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('animate-fadeOut');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }
+            }, 5000);
+        }
+        
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
