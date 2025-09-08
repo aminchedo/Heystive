@@ -1,0 +1,26 @@
+{
+  "test_info": {
+    "start_time": "2025-09-08T03:28:56.374556",
+    "end_time": "2025-09-08T03:28:56.421890",
+    "duration_seconds": 0.047334,
+    "test_version": "1.0.0"
+  },
+  "results": {
+    "settings_manager": true,
+    "service_manager": true,
+    "desktop_ui": false,
+    "web_interface": false,
+    "integration": true,
+    "windows_service": true
+  },
+  "summary": {
+    "total_tests": 6,
+    "passed_tests": 4,
+    "pass_rate": 66.66666666666666
+  },
+  "environment": {
+    "python_version": "3.13.3 (main, Apr  8 2025, 19:55:40) [GCC 14.2.0]",
+    "platform": "linux",
+    "working_directory": "/workspace/heystive_professional"
+  }
+}
