@@ -1,0 +1,88 @@
+{
+  "version": "2.0.0",
+  "last_updated": "2025-09-08T03:30:12.867942",
+  "ui": {
+    "theme": "light",
+    "language": "persian",
+    "rtl_layout": true,
+    "font_size": "medium",
+    "animations_enabled": true,
+    "sound_effects": true,
+    "notification_sounds": true,
+    "system_tray_enabled": true,
+    "test_setting": "test_1757302136"
+  },
+  "voice": {
+    "wake_words": {
+      "persian": [
+        "هی استو",
+        "هی استیو",
+        "های استیو",
+        "استیو"
+      ],
+      "english": [
+        "hey steve",
+        "steve",
+        "استیو"
+      ]
+    },
+    "sensitivity": 0.7,
+    "noise_reduction": true,
+    "auto_gain_control": true,
+    "input_device": "default",
+    "output_device": "default",
+    "sample_rate": 16000,
+    "channels": 1
+  },
+  "tts": {
+    "default_engine": "piper",
+    "voice_speed": 1.0,
+    "voice_pitch": 1.0,
+    "voice_volume": 0.8,
+    "persian_voice": "fa_IR-gyro-medium",
+    "english_voice": "en_US-lessac-medium",
+    "output_format": "wav",
+    "quality": "medium"
+  },
+  "service": {
+    "auto_start": true,
+    "run_on_startup": true,
+    "minimize_to_tray": true,
+    "show_notifications": true,
+    "log_level": "INFO",
+    "max_log_size_mb": 50,
+    "keep_logs_days": 30
+  },
+  "advanced": {
+    "api_timeout": 30,
+    "max_retries": 3,
+    "cache_enabled": true,
+    "cache_size_mb": 100,
+    "debug_mode": false,
+    "performance_monitoring": true,
+    "usage_analytics": false,
+    "auto_updates": true
+  },
+  "shortcuts": {
+    "activate_voice": "Ctrl+Shift+Space",
+    "show_hide_ui": "Ctrl+Shift+H",
+    "settings": "Ctrl+Comma",
+    "quit": "Ctrl+Q"
+  },
+  "web_interface": {
+    "port": 5001,
+    "host": "localhost",
+    "auto_open_browser": true,
+    "enable_remote_access": false,
+    "ssl_enabled": false,
+    "session_timeout_minutes": 60
+  },
+  "desktop_interface": {
+    "window_width": 1200,
+    "window_height": 800,
+    "remember_position": true,
+    "always_on_top": false,
+    "opacity": 1.0,
+    "startup_minimized": false
+  }
+}

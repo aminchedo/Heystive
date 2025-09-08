@@ -1,0 +1,35 @@
+{
+  "wake_words": {
+    "persian": [
+      "هی استو",
+      "هی استیو",
+      "های استیو",
+      "استیو"
+    ],
+    "english": [
+      "hey steve",
+      "steve",
+      "استیو"
+    ]
+  },
+  "audio": {
+    "sample_rate": 16000,
+    "chunk_size": 1024,
+    "detection_threshold": 0.7,
+    "silence_timeout": 3.0
+  },
+  "activation": {
+    "enabled": true,
+    "languages": [
+      "persian",
+      "english"
+    ],
+    "response_delay": 0.5,
+    "max_retries": 3
+  },
+  "logging": {
+    "level": "INFO",
+    "max_log_size_mb": 50,
+    "keep_logs_days": 30
+  }
+}
