@@ -1,0 +1,14 @@
+{
+  "engine": "custom",
+  "download_timestamp": "2025-09-08T02:40:57.880029",
+  "model_info": {
+    "name": "Persian NLP TTS Models",
+    "type": "mixed",
+    "language": "persian",
+    "quality": "varied",
+    "repos_downloaded": 1,
+    "source": "Multiple Persian NLP repositories"
+  },
+  "path": "/workspace/heystive_professional/heystive/models/persian_tts/custom",
+  "status": "downloaded"
+}

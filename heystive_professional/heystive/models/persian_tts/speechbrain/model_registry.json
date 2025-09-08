@@ -1,0 +1,14 @@
+{
+  "engine": "speechbrain",
+  "download_timestamp": "2025-09-08T02:40:58.714152",
+  "model_info": {
+    "name": "SpeechBrain Persian TTS",
+    "type": "neural_tts",
+    "language": "persian",
+    "quality": "high",
+    "status": "setup_ready",
+    "source": "SpeechBrain framework"
+  },
+  "path": "/workspace/heystive_professional/heystive/models/persian_tts/speechbrain",
+  "status": "downloaded"
+}

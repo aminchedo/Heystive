@@ -13,86 +13,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import logging
 
-# Auto-generated model paths from downloaded models (2025-09-08 02:42:46)
-import os
-from pathlib import Path
-
-# Base path for downloaded models
-DOWNLOADED_MODELS_BASE_PATH = Path(__file__).parent.parent.parent / "models" / "persian_tts"
-
-# Downloaded model paths from comprehensive registry
-COQUI_MODEL_PATH = DOWNLOADED_MODELS_BASE_PATH / "coqui"
-PIPER_MODEL_PATH = DOWNLOADED_MODELS_BASE_PATH / "piper" 
-CUSTOM_MODEL_PATH = DOWNLOADED_MODELS_BASE_PATH / "custom"
-SPEECHBRAIN_MODEL_PATH = DOWNLOADED_MODELS_BASE_PATH / "speechbrain"
-GTTS_CONFIG_PATH = DOWNLOADED_MODELS_BASE_PATH / "gtts"
-
-# Available downloaded models registry
-DOWNLOADED_MODELS_REGISTRY = {
-    "download_timestamp": "2025-09-08T02:40:58.714278",
-    "downloaded_models": [
-        "gtts_persian_enhanced",
-        "persian_nlp_custom",
-        "coqui_tts",
-        "speechbrain_setup"
-    ],
-    "failed_downloads": [
-        [
-            "piper_persian",
-            "No voices downloaded"
-        ]
-    ],
-    "model_paths": {
-        "coqui": "/workspace/heystive_professional/heystive/models/persian_tts/coqui",
-        "gtts": "/workspace/heystive_professional/heystive/models/persian_tts/gtts",
-        "speechbrain": "/workspace/heystive_professional/heystive/models/persian_tts/speechbrain",
-        "piper": "/workspace/heystive_professional/heystive/models/persian_tts/piper",
-        "custom": "/workspace/heystive_professional/heystive/models/persian_tts/custom"
-    },
-    "available_engines": [
-        "coqui",
-        "gtts",
-        "speechbrain",
-        "piper",
-        "custom"
-    ],
-    "model_sizes": {
-        "coqui": "0.5MB",
-        "gtts": "0.0MB",
-        "speechbrain": "0.0MB",
-        "piper": "0.0MB",
-        "custom": "0.0MB"
-    },
-    "system_info": {
-        "disk_space_gb": 113.7638931274414,
-        "total_models": 4
-    }
-}
-
-# Check if unified loader is available
-try:
-    from ...models.unified_tts_loader import get_unified_tts_loader
-    UNIFIED_LOADER_AVAILABLE = True
-except ImportError:
-    UNIFIED_LOADER_AVAILABLE = False
-
-def get_downloaded_model_path(engine: str) -> Optional[Path]:
-    """Get path for downloaded model engine"""
-    model_paths = {
-        "coqui": COQUI_MODEL_PATH,
-        "piper": PIPER_MODEL_PATH,
-        "custom": CUSTOM_MODEL_PATH,
-        "speechbrain": SPEECHBRAIN_MODEL_PATH,
-        "gtts": GTTS_CONFIG_PATH
-    }
-    return model_paths.get(engine)
-
-def is_downloaded_model_available(engine: str) -> bool:
-    """Check if downloaded model is available"""
-    path = get_downloaded_model_path(engine)
-    return path and path.exists()
-
-
 # Suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
 
@@ -127,9 +47,6 @@ class PersianMultiTTSManager:
         self._auto_select_best_engine()
         
         print(f"✅ Persian TTS Manager initialized with {len(self.engines)} engines")
-        
-        # Check downloaded models integration
-        self._check_downloaded_models()
     
     def _initialize_all_engines(self):
         """Initialize ALL 6 TTS engines with exact model paths"""
@@ -880,29 +797,6 @@ class PersianMultiTTSManager:
         if self.current_engine:
             return self.engines[self.current_engine]
         return None
-
-
-    def _check_downloaded_models(self):
-        """Check and integrate downloaded models"""
-        if not UNIFIED_LOADER_AVAILABLE:
-            print("⚠️ Unified loader not available")
-            return
-        
-        try:
-            from ...models.unified_tts_loader import get_unified_tts_loader
-            loader = get_unified_tts_loader()
-            
-            downloaded_engines = loader.get_available_engines()
-            print(f"📦 Downloaded engines available: {len(downloaded_engines)}")
-            
-            for engine in downloaded_engines:
-                if loader.is_engine_available(engine):
-                    print(f"   ✅ {engine}: {loader.get_model_path(engine)}")
-                else:
-                    print(f"   ❌ {engine}: Not available")
-                    
-        except Exception as e:
-            print(f"⚠️ Error checking downloaded models: {e}")
 
 # IMMEDIATE EXECUTION AND TESTING
 if __name__ == "__main__":

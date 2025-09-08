@@ -1,0 +1,41 @@
+{
+  "download_timestamp": "2025-09-08T02:40:58.714278",
+  "downloaded_models": [
+    "gtts_persian_enhanced",
+    "persian_nlp_custom",
+    "coqui_tts",
+    "speechbrain_setup"
+  ],
+  "failed_downloads": [
+    [
+      "piper_persian",
+      "No voices downloaded"
+    ]
+  ],
+  "model_paths": {
+    "coqui": "/workspace/heystive_professional/heystive/models/persian_tts/coqui",
+    "gtts": "/workspace/heystive_professional/heystive/models/persian_tts/gtts",
+    "speechbrain": "/workspace/heystive_professional/heystive/models/persian_tts/speechbrain",
+    "piper": "/workspace/heystive_professional/heystive/models/persian_tts/piper",
+    "custom": "/workspace/heystive_professional/heystive/models/persian_tts/custom"
+  },
+  "available_engines": [
+    "coqui",
+    "gtts",
+    "speechbrain",
+    "piper",
+    "custom"
+  ],
+  "model_sizes": {
+    "coqui": "0.5MB",
+    "gtts": "0.0MB",
+    "speechbrain": "0.0MB",
+    "piper": "0.0MB",
+    "custom": "0.0MB"
+  },
+  "system_info": {
+    "disk_space_gb": 113.7635269165039,
+    "total_models": 4
+  },
+  "last_maintenance": "2025-09-08T02:46:25.771181"
+}
