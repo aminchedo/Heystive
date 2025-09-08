@@ -1,0 +1,134 @@
+{
+  "system_info": {
+    "platform": "Linux",
+    "architecture": "64bit",
+    "python_version": "3.13.3",
+    "processor": "x86_64",
+    "ram_gb": 15.6,
+    "has_gpu": false
+  },
+  "capability_level": "CPU_OPTIMIZED",
+  "recommended_models": [
+    "silta_persian",
+    "parsi_tts_cpu"
+  ],
+  "all_models": {
+    "xtts_v2": {
+      "name": "XTTS-v2 Persian",
+      "quality": "حرفه‌ای",
+      "size_gb": 2.0,
+      "huggingface_id": "coqui/XTTS-v2",
+      "features": [
+        "Voice Cloning",
+        "Studio Quality",
+        "Multi-speaker"
+      ],
+      "requirements": "8GB+ VRAM, GPU required",
+      "supported_hardware": [
+        "HIGH_END"
+      ],
+      "description": "Professional-grade Persian TTS with voice cloning capabilities"
+    },
+    "parsi_tts": {
+      "name": "ParsiTTS",
+      "quality": "بالا",
+      "size_gb": 0.8,
+      "huggingface_id": "persiannlp/parsi-tts",
+      "features": [
+        "High Quality",
+        "VITS Architecture",
+        "Persian Optimized"
+      ],
+      "requirements": "4GB+ RAM, GPU recommended",
+      "supported_hardware": [
+        "HIGH_END",
+        "MEDIUM"
+      ],
+      "description": "High-quality Persian TTS based on VITS architecture"
+    },
+    "vits_persian": {
+      "name": "VITS-Persian",
+      "quality": "بالا",
+      "size_gb": 0.6,
+      "huggingface_id": "persian-tts/vits-persian",
+      "features": [
+        "VITS Architecture",
+        "Persian Tokenization",
+        "Natural Sound"
+      ],
+      "requirements": "4GB+ RAM, GPU recommended",
+      "supported_hardware": [
+        "HIGH_END",
+        "MEDIUM"
+      ],
+      "description": "VITS architecture optimized for Persian language"
+    },
+    "fastpitch_persian": {
+      "name": "FastPitch-Persian",
+      "quality": "بالا",
+      "size_gb": 0.4,
+      "huggingface_id": "persian-tts/fastpitch-persian",
+      "features": [
+        "Speed Control",
+        "Pitch Control",
+        "Real-time"
+      ],
+      "requirements": "GPU + HiFiGAN Vocoder",
+      "supported_hardware": [
+        "HIGH_END",
+        "MEDIUM"
+      ],
+      "description": "Fast Persian TTS with controllable speech parameters"
+    },
+    "silta_persian": {
+      "name": "Silta Persian TTS",
+      "quality": "متوسط",
+      "size_gb": 0.2,
+      "huggingface_id": "persian-tts/silta-persian",
+      "features": [
+        "Lightweight",
+        "CPU Optimized",
+        "Fast Inference"
+      ],
+      "requirements": "2GB+ RAM, CPU only",
+      "supported_hardware": [
+        "CPU_OPTIMIZED",
+        "LOW_END"
+      ],
+      "description": "Lightweight Persian TTS suitable for resource-constrained systems"
+    },
+    "parsi_tts_cpu": {
+      "name": "ParsiTTS-CPU",
+      "quality": "بالا",
+      "size_gb": 0.5,
+      "huggingface_id": "persiannlp/parsi-tts-cpu",
+      "features": [
+        "CPU Optimized",
+        "High Quality",
+        "Persian Optimized"
+      ],
+      "requirements": "4GB+ RAM, CPU optimized",
+      "supported_hardware": [
+        "CPU_OPTIMIZED"
+      ],
+      "description": "CPU-optimized version of ParsiTTS"
+    },
+    "basic_persian": {
+      "name": "Basic Persian TTS",
+      "quality": "پایه",
+      "size_gb": 0.1,
+      "huggingface_id": "persian-tts/basic-tts",
+      "features": [
+        "Very Lightweight",
+        "Minimal Resources",
+        "Basic Quality"
+      ],
+      "requirements": "1GB+ RAM, any CPU",
+      "supported_hardware": [
+        "LOW_END"
+      ],
+      "description": "Basic Persian TTS for very low-resource systems"
+    }
+  },
+  "setup_date": "2025-09-08 00:35:11"
+}

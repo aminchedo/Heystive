@@ -1,0 +1,16 @@
+{
+  "id": "parsi_tts_cpu",
+  "name": "ParsiTTS-CPU",
+  "quality": "بالا",
+  "size_gb": 0.5,
+  "huggingface_id": "persiannlp/parsi-tts-cpu",
+  "features": [
+    "CPU Optimized",
+    "High Quality",
+    "Persian Optimized"
+  ],
+  "requirements": "4GB+ RAM, CPU optimized",
+  "description": "CPU-optimized version of ParsiTTS",
+  "status": "placeholder",
+  "created_date": "2025-09-08 00:35:11"
+}

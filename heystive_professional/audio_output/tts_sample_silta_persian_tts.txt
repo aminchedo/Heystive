@@ -1,0 +1,15 @@
+# Persian TTS Sample - Silta Persian TTS
+Text: بله سرورم
+Model: Silta Persian TTS
+Quality: متوسط
+Generated with: Heystive Persian TTS System
+
+This is a simulation file. In real implementation, 
+this would be an actual audio file (.wav) containing 
+the synthesized Persian speech.
+
+Model Information:
+- Size: 0.2GB
+- Features: Lightweight, CPU Optimized
+- Requirements: 2GB+ RAM, CPU only
+- Hugging Face: persian-tts/silta-persian

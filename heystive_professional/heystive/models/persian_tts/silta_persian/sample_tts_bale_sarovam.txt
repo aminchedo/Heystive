@@ -1,0 +1,23 @@
+# Persian TTS Sample - Silta Persian TTS
+# نمونه TTS فارسی - Silta Persian TTS
+
+Text: بله سرورم
+Pronunciation: bale sarovam
+Meaning: Yes, my lord/master
+
+Model: Silta Persian TTS
+Quality: متوسط
+Size: 0.2GB
+
+This is a placeholder file. To generate actual audio:
+1. Download the model using DOWNLOAD_GUIDE.md
+2. Use the Heystive TTS system
+3. Generate audio with: manager.generate_tts_audio("بله سرورم")
+
+Features:
+- Lightweight
+- CPU Optimized
+- Fast Inference
+
+Requirements:
+2GB+ RAM, CPU only

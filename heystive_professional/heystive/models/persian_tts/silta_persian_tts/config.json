@@ -1,0 +1,13 @@
+{
+  "model_name": "Silta Persian TTS",
+  "quality": "متوسط",
+  "size_gb": 0.2,
+  "huggingface_id": "persian-tts/silta-persian",
+  "features": [
+    "Lightweight",
+    "CPU Optimized"
+  ],
+  "requirements": "2GB+ RAM, CPU only",
+  "downloaded": true,
+  "download_simulation": true
+}
