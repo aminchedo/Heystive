@@ -1,1 +1,0 @@
-# Test suite for Steve Voice Assistant
