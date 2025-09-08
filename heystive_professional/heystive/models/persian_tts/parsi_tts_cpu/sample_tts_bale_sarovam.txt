@@ -1,0 +1,23 @@
+# Persian TTS Sample - ParsiTTS-CPU
+# نمونه TTS فارسی - ParsiTTS-CPU
+
+Text: بله سرورم
+Pronunciation: bale sarovam
+Meaning: Yes, my lord/master
+
+Model: ParsiTTS-CPU
+Quality: بالا
+Size: 0.5GB
+
+This is a placeholder file. To generate actual audio:
+1. Download the model using DOWNLOAD_GUIDE.md
+2. Use the Heystive TTS system
+3. Generate audio with: manager.generate_tts_audio("بله سرورم")
+
+Features:
+- CPU Optimized
+- High Quality
+- Persian Optimized
+
+Requirements:
+4GB+ RAM, CPU optimized
