@@ -1,0 +1,16 @@
+{
+  "id": "silta_persian",
+  "name": "Silta Persian TTS",
+  "quality": "متوسط",
+  "size_gb": 0.2,
+  "huggingface_id": "persian-tts/silta-persian",
+  "features": [
+    "Lightweight",
+    "CPU Optimized",
+    "Fast Inference"
+  ],
+  "requirements": "2GB+ RAM, CPU only",
+  "description": "Lightweight Persian TTS suitable for resource-constrained systems",
+  "status": "placeholder",
+  "created_date": "2025-09-08 00:35:11"
+}
