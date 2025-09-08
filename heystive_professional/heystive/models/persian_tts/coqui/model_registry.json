@@ -1,0 +1,14 @@
+{
+  "engine": "coqui",
+  "download_timestamp": "2025-09-08T02:40:58.695666",
+  "model_info": {
+    "name": "Coqui TTS",
+    "type": "neural_tts",
+    "language": "persian",
+    "quality": "high",
+    "files_extracted": 2,
+    "source": "https://github.com/coqui-ai/TTS"
+  },
+  "path": "/workspace/heystive_professional/heystive/models/persian_tts/coqui",
+  "status": "downloaded"
+}
