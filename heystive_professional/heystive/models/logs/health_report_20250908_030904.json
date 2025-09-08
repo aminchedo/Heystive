@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-09-08T03:09:04.441830",
+  "disk_space": {
+    "total": "126G",
+    "used": "5.7G",
+    "available": "114G",
+    "percent_used": 5.0,
+    "status": "ok"
+  },
+  "model_files": {
+    "status": "critical",
+    "total_files": 34,
+    "missing_engines": [
+      "piper"
+    ],
+    "available_engines": [
+      "coqui",
+      "gtts",
+      "speechbrain",
+      "custom"
+    ],
+    "total_engines": 5
+  },
+  "imports": {
+    "unified_loader": {
+      "status": "critical",
+      "error": "No module named 'psutil'"
+    },
+    "tts_manager": {
+      "status": "ok"
+    }
+  },
+  "model_accessibility": {
+    "status": "critical",
+    "error": "No module named 'psutil'"
+  },
+  "overall_status": "critical",
+  "critical_issues": [
+    "model_files",
+    "import_unified_loader",
+    "model_accessibility"
+  ],
+  "warning_issues": []
+}
