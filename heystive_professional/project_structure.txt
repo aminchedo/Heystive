@@ -1,0 +1,112 @@
+.
+├── ADVANCED_SETTINGS_IMPLEMENTATION_COMPLETE.md
+├── audio_output
+│   ├── bale_sarovam_analysis.txt
+│   ├── bale_sarovam_beeps.wav
+│   ├── bale_sarovam_phonetic.txt
+│   ├── bale_sarovam_tones.wav
+│   ├── cli_simulation_1757292819.txt
+│   └── tts_sample_silta_persian_tts.txt
+├── COMPLETE_TEST_REPORT.md
+├── demo_advanced_settings.py
+├── download_instructions.py
+├── download_persian_models.py
+├── FUNCTIONAL_UI_COMPLETE_REPORT.md
+├── heystive
+│   ├── config
+│   │   └── ui_settings
+│   ├── core
+│   │   └── voice_pipeline.py
+│   ├── engines
+│   │   ├── tts
+│   │   └── wake_word
+│   ├── integrations
+│   │   ├── __init__.py
+│   │   └── voice_bridge.py
+│   ├── intelligence
+│   │   ├── conversation_flow.py
+│   │   ├── __init__.py
+│   │   ├── langgraph_agent.py
+│   │   └── llm_manager.py
+│   ├── logs
+│   │   └── services
+│   ├── main.py
+│   ├── models
+│   │   ├── backups
+│   │   ├── cache
+│   │   ├── COMPREHENSIVE_MODEL_REGISTRY.json
+│   │   ├── COMPREHENSIVE_SYSTEM_DOCUMENTATION.md
+│   │   ├── COMPREHENSIVE_TTS_INSTALLATION_GUIDE.md
+│   │   ├── configs
+│   │   ├── hardware_detector.py
+│   │   ├── __init__.py
+│   │   ├── INSTALLATION_COMPLETE_SUMMARY.md
+│   │   ├── intelligent_model_manager.py
+│   │   ├── logs
+│   │   ├── model_downloader.py
+│   │   ├── monitoring
+│   │   ├── persian_tts
+│   │   ├── system_verification.py
+│   │   └── unified_tts_loader.py
+│   ├── security
+│   │   ├── api_auth.py
+│   │   └── __init__.py
+│   ├── services
+│   │   └── windows_service
+│   ├── ui
+│   │   ├── advanced_settings
+│   │   ├── desktop
+│   │   └── web
+│   └── utils
+│       ├── error_handler.py
+│       ├── health_checker.py
+│       ├── __init__.py
+│       ├── model_downloader.py
+│       ├── monitoring_endpoints.py
+│       ├── performance_monitor.py
+│       ├── secure_subprocess.py
+│       └── system_monitor.py
+├── heystive.log
+├── legacy
+│   ├── heystive
+│   │   ├── config
+│   │   ├── __init__.py
+│   │   ├── integration
+│   │   ├── main_voice_integration.py
+│   │   ├── ui
+│   │   └── voice
+│   ├── organized_root
+│   │   ├── demos
+│   │   ├── main_apps
+│   │   ├── scripts
+│   │   ├── tests
+│   │   └── utilities
+│   └── steve
+│       ├── core
+│       ├── __init__.py
+│       ├── intelligence
+│       ├── models
+│       ├── security
+│       ├── smart_home
+│       ├── ui
+│       └── utils
+├── main_functional.py
+├── main.py
+├── PERSIAN_TTS_SETUP_REPORT.md
+├── project_structure.txt
+├── README.md
+├── REORGANIZATION_VALIDATION_REPORT.md
+├── requirements.txt
+├── scripts
+│   └── comprehensive_validation.py
+├── setup_persian_models.py
+├── test_advanced_persian_tts.py
+├── test_advanced_settings.py
+├── test_main_interfaces.py
+├── test_model_system.py
+├── test_persian_tts_models.py
+├── test_persian_tts_simple.py
+├── test_report_20250908_032856.json
+└── USAGE_EXAMPLES.md
+
+49 directories, 61 files
