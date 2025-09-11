@@ -1,3 +1,0 @@
-VOICE OUTPUT: Ready to track your expenses.
-Generated at: 2025-09-07T14:49:21.764840
-Duration estimate: 2.90 seconds
