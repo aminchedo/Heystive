@@ -23,8 +23,7 @@ async function startMic(wsUrl){
   };
   ws.onmessage = (e)=>{
     const j = JSON.parse(e.data);
-    const el = document.getElementById("log");
-    el.textContent += "stream: " + JSON.stringify(j) + "\n";
+    if(window.HeystiveMic.onmessage){ window.HeystiveMic.onmessage(j); }
   };
   started = true;
 }
@@ -41,7 +40,6 @@ function downsampleTo16k(f32, inRate){
   const ratio = inRate/outRate;
   const outLen = Math.floor(f32.length/ratio);
   const out = new Float32Array(outLen);
-  let pos=0;
   for(let i=0;i<outLen;i++){
     const idx = Math.floor(i*ratio);
     out[i] = f32[idx];
@@ -59,4 +57,4 @@ function pcm16le(f32){
   }
   return new Uint8Array(b);
 }
-window.HeystiveMic = {startMic, stopMic};
+window.HeystiveMic = {startMic, stopMic, onmessage:null};
