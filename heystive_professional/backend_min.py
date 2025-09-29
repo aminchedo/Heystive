@@ -10,8 +10,10 @@ except Exception:
     webrtcvad = None
 from heystive_professional.intent_router import route_intent
 from heystive_professional.store import log_message, DB_PATH
+
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
 AWAKE_UNTIL = 0.0
 WAKE_PHRASES = ["hey heystive", "hey steve", "heystive", "steve"]
 class STTIn(BaseModel):
@@ -23,6 +25,7 @@ class TTSIn(BaseModel):
 class IntentIn(BaseModel):
     text: str
 def _status_payload():
+    global AWAKE_UNTIL
     now_epoch = time.time()
     return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat(), "awake_until": AWAKE_UNTIL}
 @app.get("/ping")
@@ -33,7 +36,7 @@ def status():
     return _status_payload()
 @app.get("/api/wake")
 def wake():
-    nonlocal AWAKE_UNTIL
+    global AWAKE_UNTIL
     AWAKE_UNTIL = time.time() + 10.0
     return {"awake": True, "until": AWAKE_UNTIL}
 @app.get("/api/logs")
@@ -83,7 +86,7 @@ def intent(payload: IntentIn):
     log_message("user", payload.text, name, result)
     low = payload.text.lower()
     if any(p in low for p in WAKE_PHRASES):
-        nonlocal AWAKE_UNTIL
+        global AWAKE_UNTIL
         AWAKE_UNTIL = time.time() + 10.0
     return {"skill": name, "result": result}
 @app.websocket("/ws")
@@ -97,6 +100,7 @@ async def ws_echo(ws: WebSocket):
         pass
 @app.websocket("/ws/stream")
 async def ws_stream(ws: WebSocket):
+    global AWAKE_UNTIL
     await ws.accept()
     engine = None
     sr = 16000
@@ -154,14 +158,12 @@ async def ws_stream(ws: WebSocket):
                         await ws.send_text(json.dumps({"type": "partial", "text": part}))
                         low = part.lower()
                         if any(p in low for p in WAKE_PHRASES):
-                            nonlocal AWAKE_UNTIL
                             AWAKE_UNTIL = time.time() + 10.0
                             await ws.send_text(json.dumps({"type": "wake", "until": AWAKE_UNTIL}))
                     if final:
                         await ws.send_text(json.dumps({"type": "final", "text": final}))
                         low = final.lower()
                         if any(p in low for p in WAKE_PHRASES):
-                            nonlocal AWAKE_UNTIL
                             AWAKE_UNTIL = time.time() + 10.0
                             await ws.send_text(json.dumps({"type": "wake", "until": AWAKE_UNTIL}))
                 else:
