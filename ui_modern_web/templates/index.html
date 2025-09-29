@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heystive MVP</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/mic.js"></script>
+</head>
+<body>
+  <h1>Heystive MVP</h1>
+  <p>Backend: <code>{{ BACKEND_URL }}</code></p>
+  <div class="row">
+    <button id="ping">Ping</button>
+    <button id="ws">Open WS</button>
+    <button id="send" disabled>Send "hello"</button>
+    <button id="wake">Wake</button>
+  </div>
+  <div class="row">
+    <button id="mic_start">Start Mic</button>
+    <button id="mic_stop">Stop Mic</button>
+  </div>
+  <div class="row">
+    <label><input id="auto_intent" type="checkbox" checked> Auto Intent</label>
+    <label><input id="auto_speak" type="checkbox"> Speak Result</label>
+  </div>
+  <hr/>
+  <h3>Ask</h3>
+  <div class="row">
+    <input id="ask_text" type="text" placeholder="Ask (time, math, open url, note ...)"/>
+    <button id="ask">Send</button>
+  </div>
+  <h3>STT</h3>
+  <div class="row">
+    <input id="wavfile" type="file" accept="audio/wav"/>
+    <input id="stt_text" type="text" placeholder="Demo text (optional)"/>
+    <button id="stt">Transcribe / Echo</button>
+  </div>
+  <h3>TTS</h3>
+  <div class="row">
+    <input id="tts_text" type="text" placeholder="Type something"/>
+    <input id="tts_voice" type="text" placeholder="Voice (optional)"/>
+    <button id="tts">Speak</button>
+    <audio id="player" controls></audio>
+  </div>
+  <h3>Results</h3>
+  <div id="results"></div>
+  <div id="log"></div>
+  <script>
+  const backend = "{{ BACKEND_URL }}";
+  const wsUrl = "{{ WS_URL }}/ws";
+  const streamUrl = "{{ WS_URL }}/ws/stream";
+  const log = (t)=>{ const el=document.getElementById('log'); el.textContent += t+"\n"; };
+  const results = (t)=>{ const el=document.getElementById('results'); el.textContent = t; };
+  document.getElementById('ping').onclick = async ()=>{
+    try{ const r = await fetch(backend + "/ping"); const j = await r.json(); log("ping: " + JSON.stringify(j)); }
+    catch(e){ log("ping error"); }
+  };
+  document.getElementById('wake').onclick = async ()=>{
+    try{ const r = await fetch(backend + "/api/wake"); const j = await r.json(); log("wake: " + JSON.stringify(j)); }
+    catch(e){ log("wake error"); }
+  };
+  let sock=null;
+  document.getElementById('ws').onclick = ()=>{
+    sock = new WebSocket(wsUrl);
+    sock.onopen = ()=>{ log("ws open"); document.getElementById('send').disabled=false; };
+    sock.onmessage = (ev)=> log("ws msg: " + ev.data);
+    sock.onclose = ()=>{ log("ws closed"); document.getElementById('send').disabled=true; };
+    sock.onerror = ()=> log("ws error");
+  };
+  document.getElementById('send').onclick = ()=>{
+    if(sock && sock.readyState===1){ sock.send("hello"); }
+  };
+  document.getElementById('mic_start').onclick = ()=>{
+    window.HeystiveMic.startMic(streamUrl);
+  };
+  document.getElementById('mic_stop').onclick = ()=>{
+    window.HeystiveMic.stopMic();
+  };
+  async function fileToBase64(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = ()=> resolve(r.result.split(',')[1]);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+  async function runIntentAndMaybeSpeak(text){
+    const r = await fetch(backend + "/api/intent", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text})});
+    const j = await r.json();
+    results(JSON.stringify(j));
+    const speak = document.getElementById('auto_speak').checked;
+    if(speak){
+      let utter = "";
+      if(j.skill==="time" && j.result.time_human){ utter = "Time " + j.result.time_human; }
+      else if(j.skill==="calc" && j.result.result!==undefined){ utter = "Result " + j.result.result; }
+      else if(j.skill==="open_url" && j.result.accepted){ utter = "Open URL"; }
+      else if(j.skill==="note" && j.result.saved){ utter = "Saved note"; }
+      else { utter = "Done"; }
+      const t = await fetch(backend + "/api/tts", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text: utter})});
+      const tj = await t.json();
+      if(tj.audio_base64){
+        const src = "data:audio/wav;base64," + tj.audio_base64;
+        const player = document.getElementById('player');
+        player.src = src;
+        player.play().catch(()=>{});
+      }
+    }
+  }
+  document.getElementById('ask').onclick = async ()=>{
+    const text = document.getElementById('ask_text').value || "";
+    if(!text){ log("ask: empty"); return; }
+    await runIntentAndMaybeSpeak(text);
+  };
+  document.getElementById('stt').onclick = async ()=>{
+    const f = document.getElementById('wavfile').files[0];
+    const demoText = document.getElementById('stt_text').value;
+    let body = {};
+    if (demoText) body.text = demoText;
+    if (f) body.audio_base64 = await fileToBase64(f);
+    const r = await fetch(backend + "/api/stt", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const j = await r.json();
+    log("stt: " + JSON.stringify(j));
+    if(j.text && document.getElementById('auto_intent').checked){
+        await runIntentAndMaybeSpeak(j.text);
+    }
+  };
+  const micLog = document.getElementById('log');
+  const oldOnMessage = window.HeystiveMic && window.HeystiveMic.onmessage;
+  window.HeystiveMic.onmessage = async function(ev){
+    const j = ev;
+    micLog.textContent += "mic: " + JSON.stringify(j) + "\n";
+    if(j.type==="final" && j.text && document.getElementById('auto_intent').checked){
+      await runIntentAndMaybeSpeak(j.text);
+    }
+    if(oldOnMessage){ oldOnMessage(ev); }
+  };
+  </script>
+</body>
+</html>

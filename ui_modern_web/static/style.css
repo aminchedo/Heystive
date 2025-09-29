@@ -1,0 +1,4 @@
+body{font-family:system-ui,Arial;margin:40px;direction:rtl}
+button,input[type=text]{padding:10px 16px;margin:4px 6px}
+#log{white-space:pre-wrap;border:1px solid #ddd;padding:12px;margin-top:16px;min-height:120px}
+.row{margin:10px 0}
