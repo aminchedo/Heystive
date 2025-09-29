@@ -11,6 +11,7 @@ except Exception:
 
 from heystive_professional.intent_router import route_intent
 from heystive_professional.store import log_message
+import sqlite3
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -85,6 +86,29 @@ def intent(payload: IntentIn):
     if any(p in low for p in WAKE_PHRASES):
         AWAKE_UNTIL = time.time() + 10.0
     return {"skill": name, "result": result}
+
+@app.get("/api/logs")
+def get_logs(limit: int = 10, offset: int = 0):
+    try:
+        con = sqlite3.connect(os.environ.get("HEYSTIVE_DB", "heystive.db"))
+        cursor = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY ts DESC LIMIT ? OFFSET ?", (limit, offset))
+        rows = cursor.fetchall()
+        con.close()
+        
+        items = []
+        for row in rows:
+            items.append({
+                "id": row[0],
+                "timestamp": row[1],
+                "role": row[2],
+                "text": row[3],
+                "skill": row[4],
+                "result": json.loads(row[5]) if row[5] else {}
+            })
+        
+        return {"items": items, "limit": limit, "offset": offset, "count": len(items)}
+    except Exception as e:
+        return {"error": str(e), "items": []}
 
 @app.websocket("/ws")
 async def ws_echo(ws: WebSocket):

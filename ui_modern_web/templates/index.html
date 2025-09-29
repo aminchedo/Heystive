@@ -1,131 +1,1018 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Heystive MVP</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <script src="/static/mic.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار صوتی فارسی - استیو</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Vazir', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-interface {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .voice-control {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .voice-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+        }
+
+        .voice-button.listening {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-button.processing {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .voice-button i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .status-text {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .test-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .test-btn.primary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .test-btn.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .test-btn.warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .test-btn.danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .test-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .demo-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .chat-demo {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 200px;
+            border: 1px solid #e0e0e0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #2196F3;
+            color: white;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .assistant-message {
+            background: #e0e0e0;
+            color: #333;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .command-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .system-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        .control-toggles {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .slider {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        .toggle-switch input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .results-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .results-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .result-item .skill-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .result-item .result-content {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .main-interface {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .voice-button {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .test-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Heystive MVP</h1>
-  <p>Backend: <code>{{ BACKEND_URL }}</code></p>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 دستیار صوتی فارسی - استیو</h1>
+            <p>Persian Voice Assistant - Production Ready</p>
+        </div>
 
-  <div class="row">
-    <button id="ping">Ping</button>
-    <button id="ws">Open WS</button>
-    <button id="send" disabled>Send "hello"</button>
-    <button id="wake">Wake</button>
-  </div>
+        <div class="main-interface">
+            <div class="voice-control">
+                <button class="voice-button" id="voiceButton" onclick="toggleVoice()">
+                    <i class="fas fa-microphone" id="voiceIcon"></i>
+                </button>
+                <div class="status-text" id="statusText">سیستم در حال بارگذاری...</div>
+                
+                <div class="control-toggles">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto_intent" checked>
+                        <span class="slider"></span>
+                        <span class="toggle-label">Auto Intent</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto_speak" checked>
+                        <span class="slider"></span>
+                        <span class="toggle-label">Auto Speak</span>
+                    </label>
+                </div>
+                
+                <div class="test-buttons">
+                    <button class="test-btn primary" id="testTTSBtn" onclick="testRealTTS()" disabled>
+                        <i class="fas fa-volume-up"></i> تست صدای واقعی
+                    </button>
+                    <button class="test-btn success" id="testWakeBtn" onclick="testWakeWord()" disabled>
+                        <i class="fas fa-bell"></i> تست "بله سرورم"
+                    </button>
+                    <button class="test-btn warning" id="testChatBtn" onclick="testChat()" disabled>
+                        <i class="fas fa-comment"></i> تست گفتگو
+                    </button>
+                    <button class="test-btn danger" id="refreshBtn" onclick="refreshSystem()">
+                        <i class="fas fa-sync-alt"></i> بازنشانی
+                    </button>
+                </div>
+            </div>
 
-  <div class="row">
-    <button id="mic_start">Start Mic</button>
-    <button id="mic_stop">Stop Mic</button>
-  </div>
+            <div id="alertContainer"></div>
 
-  <hr/>
+            <div class="results-panel" id="results">
+                <h3>📋 Results</h3>
+                <div id="resultsContent">
+                    <div class="result-item">
+                        <div class="skill-name">System</div>
+                        <div class="result-content">Ready to process commands</div>
+                    </div>
+                </div>
+            </div>
 
-  <h3>Ask</h3>
-  <div class="row">
-    <input id="ask_text" type="text" placeholder="Ask (time, math, open url)"/>
-    <button id="ask">Send</button>
-  </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-microphone-alt"></i>
+                    <h3>تشخیص گفتار فارسی</h3>
+                    <p>تبدیل گفتار فارسی به متن با دقت بالا و سرعت مناسب</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-volume-up"></i>
+                    <h3>تولید گفتار فارسی</h3>
+                    <p>تبدیل متن فارسی به گفتار طبیعی با کیفیت بالا</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-home"></i>
+                    <h3>کنترل خانه هوشمند</h3>
+                    <p>کنترل دستگاه‌های خانه هوشمند با فرمان‌های صوتی</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>حفظ حریم خصوصی</h3>
+                    <p>پردازش محلی داده‌ها بدون ارسال به سرورهای خارجی</p>
+                </div>
+            </div>
+        </div>
 
-  <h3>STT</h3>
-  <div class="row">
-    <input id="wavfile" type="file" accept="audio/wav"/>
-    <input id="stt_text" type="text" placeholder="Demo text (optional)"/>
-    <button id="stt">Transcribe / Echo</button>
-  </div>
+        <div class="demo-section">
+            <h3>🗣️ آزمایش فرمان‌های صوتی</h3>
+            <input type="text" class="command-input" id="commandInput" 
+                   placeholder="فرمان خود را تایپ کنید...">
+            
+            <div class="chat-demo" id="chatDemo">
+                <div class="chat-message assistant-message">
+                    سلام! من استیو هستم. چطور می‌تونم کمکتون کنم؟
+                </div>
+            </div>
 
-  <h3>TTS</h3>
-  <div class="row">
-    <input id="tts_text" type="text" placeholder="Type something"/>
-    <input id="tts_voice" type="text" placeholder="Voice (optional)"/>
-    <button id="tts">Speak</button>
-    <audio id="player" controls></audio>
-  </div>
+            <div class="test-buttons">
+                <button class="test-btn primary" onclick="sendTestCommand('سلام استیو')">
+                    سلام استیو
+                </button>
+                <button class="test-btn success" onclick="sendTestCommand('چراغ را روشن کن')">
+                    چراغ را روشن کن
+                </button>
+                <button class="test-btn warning" onclick="sendTestCommand('ساعت چنده؟')">
+                    ساعت چنده؟
+                </button>
+            </div>
+        </div>
 
-  <div id="log"></div>
+        <div class="demo-section">
+            <h3>📊 وضعیت سیستم</h3>
+            <div class="system-status" id="systemStatus">
+                <div class="status-item" id="ttsStatus">
+                    <strong>Text-to-Speech</strong><br>
+                    <span>در حال بررسی...</span>
+                </div>
+                <div class="status-item" id="backendStatus">
+                    <strong>Backend</strong><br>
+                    <span>در حال بررسی...</span>
+                </div>
+                <div class="status-item" id="audioStatus">
+                    <strong>Audio System</strong><br>
+                    <span>در حال بررسی...</span>
+                </div>
+                <div class="status-item" id="smartHomeStatus">
+                    <strong>Smart Home</strong><br>
+                    <span>در حال بررسی...</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-  const backend = "{{ BACKEND_URL }}";
-  const wsUrl = "{{ WS_URL }}/ws";
-  const streamUrl = "{{ WS_URL }}/ws/stream";
-  const log = (t)=>{ const el=document.getElementById('log'); el.textContent += t+"\\n"; };
+    <div class="footer">
+        <p>دستیار صوتی فارسی - استیو | ساخته شده با ❤️ برای جامعه فارسی‌زبان</p>
+        <p>Persian Voice Assistant - Open Source & Privacy-First</p>
+    </div>
 
-  document.getElementById('ping').onclick = async ()=>{
-    try{ const r = await fetch(backend + "/ping"); const j = await r.json(); log("ping: " + JSON.stringify(j)); }
-    catch(e){ log("ping error"); }
-  };
+    <script>
+        let isListening = false;
+        let systemReady = false;
 
-  document.getElementById('wake').onclick = async ()=>{
-    try{ const r = await fetch(backend + "/api/wake"); const j = await r.json(); log("wake: " + JSON.stringify(j)); }
-    catch(e){ log("wake error"); }
-  };
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemHealth();
+            
+            // Auto-refresh system status every 30 seconds
+            setInterval(checkSystemHealth, 30000);
+            
+            // Setup command input
+            document.getElementById('commandInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const command = this.value.trim();
+                    if (command) {
+                        sendTestCommand(command);
+                        this.value = '';
+                    }
+                }
+            });
+        });
 
-  let sock=null;
-  document.getElementById('ws').onclick = ()=>{
-    sock = new WebSocket(wsUrl);
-    sock.onopen = ()=>{ log("ws open"); document.getElementById('send').disabled=false; };
-    sock.onmessage = (ev)=> log("ws msg: " + ev.data);
-    sock.onclose = ()=>{ log("ws closed"); document.getElementById('send').disabled=true; };
-    sock.onerror = ()=> log("ws error");
-  };
-  document.getElementById('send').onclick = ()=>{
-    if(sock && sock.readyState===1){ sock.send("hello"); }
-  };
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const health = await response.json();
+                
+                updateSystemStatus(health);
+                
+                if (health.system_initialized && health.tts_ready) {
+                    systemReady = true;
+                    enableButtons();
+                    updateStatusText('سیستم آماده است - کلیک کنید تا شروع کنید');
+                } else {
+                    systemReady = false;
+                    disableButtons();
+                    updateStatusText('سیستم در حال راه‌اندازی...');
+                }
+                
+            } catch (error) {
+                console.error('Health check failed:', error);
+                updateStatusText('خطا در ارتباط با سرور');
+                disableButtons();
+            }
+        }
 
-  document.getElementById('mic_start').onclick = ()=>{
-    window.HeystiveMic.startMic(streamUrl);
-  };
-  document.getElementById('mic_stop').onclick = ()=>{
-    window.HeystiveMic.stopMic();
-  };
+        function updateSystemStatus(health) {
+            // Update TTS status
+            const ttsElement = document.getElementById('ttsStatus');
+            if (health.tts_ready) {
+                ttsElement.className = 'status-item status-ready';
+                ttsElement.innerHTML = '<strong>Text-to-Speech</strong><br><span>آماده</span>';
+            } else {
+                ttsElement.className = 'status-item status-error';
+                ttsElement.innerHTML = '<strong>Text-to-Speech</strong><br><span>خطا</span>';
+            }
+            
+            // Update backend status
+            const backendElement = document.getElementById('backendStatus');
+            if (health.system_initialized) {
+                backendElement.className = 'status-item status-ready';
+                backendElement.innerHTML = '<strong>Backend</strong><br><span>متصل</span>';
+            } else {
+                backendElement.className = 'status-item status-warning';
+                backendElement.innerHTML = '<strong>Backend</strong><br><span>در حال راه‌اندازی</span>';
+            }
+            
+            // Update audio status (assume ready if TTS is ready)
+            const audioElement = document.getElementById('audioStatus');
+            if (health.tts_ready) {
+                audioElement.className = 'status-item status-ready';
+                audioElement.innerHTML = '<strong>Audio System</strong><br><span>آماده</span>';
+            } else {
+                audioElement.className = 'status-item status-warning';
+                audioElement.innerHTML = '<strong>Audio System</strong><br><span>در حال تنظیم</span>';
+            }
+            
+            // Update smart home status
+            const smartHomeElement = document.getElementById('smartHomeStatus');
+            if (health.components && health.components.smart_home) {
+                smartHomeElement.className = 'status-item status-ready';
+                smartHomeElement.innerHTML = '<strong>Smart Home</strong><br><span>متصل</span>';
+            } else {
+                smartHomeElement.className = 'status-item status-warning';
+                smartHomeElement.innerHTML = '<strong>Smart Home</strong><br><span>غیرفعال</span>';
+            }
+        }
 
-  async function fileToBase64(file){
-    return new Promise((resolve,reject)=>{
-      const r = new FileReader();
-      r.onload = ()=> resolve(r.result.split(',')[1]);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
+        function enableButtons() {
+            document.getElementById('testTTSBtn').disabled = false;
+            document.getElementById('testWakeBtn').disabled = false;
+            document.getElementById('testChatBtn').disabled = false;
+        }
 
-  document.getElementById('ask').onclick = async ()=>{
-    const text = document.getElementById('ask_text').value || "";
-    if(!text){ log("ask: empty"); return; }
-    const r = await fetch(backend + "/api/intent", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text})});
-    const j = await r.json();
-    log("intent: " + JSON.stringify(j));
-  };
+        function disableButtons() {
+            document.getElementById('testTTSBtn').disabled = true;
+            document.getElementById('testWakeBtn').disabled = true;
+            document.getElementById('testChatBtn').disabled = true;
+        }
 
-  document.getElementById('stt').onclick = async ()=>{
-    const f = document.getElementById('wavfile').files[0];
-    const demoText = document.getElementById('stt_text').value;
-    let body = {};
-    if (demoText) body.text = demoText;
-    if (f) body.audio_base64 = await fileToBase64(f);
-    const r = await fetch(backend + "/api/stt", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-    const j = await r.json();
-    log("stt: " + JSON.stringify(j));
-  };
+        function updateStatusText(message) {
+            document.getElementById('statusText').textContent = message;
+        }
 
-  document.getElementById('tts').onclick = async ()=>{
-    const text = document.getElementById('tts_text').value || "Hello from Heystive";
-    const voice = document.getElementById('tts_voice').value || null;
-    const r = await fetch(backend + "/api/tts", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(voice ? {text, voice} : {text})});
-    const j = await r.json();
-    if(j.audio_base64){
-      const src = "data:audio/wav;base64," + j.audio_base64;
-      const player = document.getElementById('player');
-      player.src = src;
-      player.play().catch(()=>{});
-      log("tts: engine=" + j.engine + ", bytes=" + j.audio_base64.length + (j.voice ? ", voice="+j.voice : ""));
-    }else{
-      log("tts demo: " + JSON.stringify(j));
-    }
-  };
-  </script>
+        async function testRealTTS() {
+            if (!systemReady) {
+                showAlert('سیستم هنوز آماده نیست. لطفاً صبر کنید.', 'error');
+                return;
+            }
+
+            const testTexts = [
+                'سلام! من استیو هستم، دستیار صوتی فارسی شما',
+                'تست سیستم تولید گفتار با موفقیت انجام شد',
+                'صدای من چطوره؟ امیدوارم خوب باشه!'
+            ];
+            
+            const randomText = testTexts[Math.floor(Math.random() * testTexts.length)];
+            
+            try {
+                showAlert('در حال تولید صدا...', 'info');
+                updateButtonState('testTTSBtn', true, 'در حال تولید...');
+                
+                const response = await fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: randomText
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.audio) {
+                    // Play the generated audio
+                    const audioData = `data:audio/${result.format};base64,${result.audio}`;
+                    const audio = new Audio(audioData);
+                    
+                    audio.onloadstart = () => {
+                        showAlert('در حال پخش صدا...', 'info');
+                    };
+                    
+                    audio.oncanplay = () => {
+                        audio.play().catch(e => {
+                            console.error('Audio play error:', e);
+                            showAlert('خطا در پخش صدا. لطفاً روی صفحه کلیک کنید و دوباره امتحان کنید.', 'error');
+                        });
+                    };
+                    
+                    audio.onended = () => {
+                        showAlert('✅ تست صدا با موفقیت انجام شد!', 'success');
+                    };
+                    
+                    audio.onerror = (e) => {
+                        console.error('Audio error:', e);
+                        showAlert('خطا در پخش فایل صوتی', 'error');
+                    };
+                    
+                    // Add to chat
+                    addChatMessage(randomText, 'assistant');
+                    
+                } else {
+                    showAlert('خطا در تولید صدا: ' + (result.error || 'خطای نامشخص'), 'error');
+                }
+                
+            } catch (error) {
+                console.error('TTS test error:', error);
+                showAlert('خطا در ارتباط با سرور: ' + error.message, 'error');
+            } finally {
+                updateButtonState('testTTSBtn', false, '<i class="fas fa-volume-up"></i> تست صدای واقعی');
+            }
+        }
+
+        async function testWakeWord() {
+            if (!systemReady) {
+                showAlert('سیستم هنوز آماده نیست. لطفاً صبر کنید.', 'error');
+                return;
+            }
+
+            try {
+                showAlert('در حال تولید پاسخ wake word...', 'info');
+                updateButtonState('testWakeBtn', true, 'در حال تولید...');
+                
+                const response = await fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: 'بله سرورم، در خدمتم'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.audio) {
+                    const audioData = `data:audio/${result.format};base64,${result.audio}`;
+                    const audio = new Audio(audioData);
+                    
+                    audio.oncanplay = () => {
+                        audio.play().catch(e => {
+                            console.error('Audio play error:', e);
+                            showAlert('خطا در پخش صدا', 'error');
+                        });
+                    };
+                    
+                    audio.onended = () => {
+                        showAlert('✅ تست wake word موفقیت‌آمیز بود!', 'success');
+                    };
+                    
+                    // Add to chat
+                    addChatMessage('هی استیو', 'user');
+                    addChatMessage('بله سرورم، در خدمتم', 'assistant');
+                    
+                } else {
+                    showAlert('خطا در تولید wake word: ' + (result.error || 'خطای نامشخص'), 'error');
+                }
+                
+            } catch (error) {
+                console.error('Wake word test error:', error);
+                showAlert('خطا در تست wake word: ' + error.message, 'error');
+            } finally {
+                updateButtonState('testWakeBtn', false, '<i class="fas fa-bell"></i> تست "بله سرورم"');
+            }
+        }
+
+        async function testChat() {
+            if (!systemReady) {
+                showAlert('سیستم هنوز آماده نیست. لطفاً صبر کنید.', 'error');
+                return;
+            }
+
+            const testMessage = 'سلام استیو، حالت چطوره؟';
+            
+            try {
+                showAlert('در حال پردازش گفتگو...', 'info');
+                updateButtonState('testChatBtn', true, 'در حال پردازش...');
+                
+                const response = await fetch('/api/voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: testMessage
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Add messages to chat
+                    addChatMessage(testMessage, 'user');
+                    addChatMessage(result.response_text, 'assistant');
+                    
+                    // Play audio if available
+                    if (result.audio) {
+                        const audioData = `data:audio/${result.format};base64,${result.audio}`;
+                        const audio = new Audio(audioData);
+                        
+                        audio.oncanplay = () => {
+                            audio.play().catch(e => {
+                                console.error('Audio play error:', e);
+                            });
+                        };
+                        
+                        audio.onended = () => {
+                            showAlert('✅ تست گفتگو موفقیت‌آمیز بود!', 'success');
+                        };
+                    } else {
+                        showAlert('✅ گفتگو موفق (بدون صدا)', 'success');
+                    }
+                } else {
+                    showAlert('خطا در گفتگو: ' + (result.error || 'خطای نامشخص'), 'error');
+                }
+                
+            } catch (error) {
+                console.error('Chat test error:', error);
+                showAlert('خطا در تست گفتگو: ' + error.message, 'error');
+            } finally {
+                updateButtonState('testChatBtn', false, '<i class="fas fa-comment"></i> تست گفتگو');
+            }
+        }
+
+        async function sendTestCommand(command) {
+            try {
+                showAlert(`در حال پردازش: ${command}`, 'info');
+                
+                const autoIntent = document.getElementById('auto_intent').checked;
+                const autoSpeak = document.getElementById('auto_speak').checked;
+                
+                if (autoIntent) {
+                    const intentResponse = await fetch('/api/intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: command
+                        })
+                    });
+                    
+                    const intentResult = await intentResponse.json();
+                    addResultToPanel(intentResult);
+                    
+                    if (autoSpeak && intentResult.skill !== 'fallback') {
+                        const ttsResponse = await fetch('/api/tts', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                text: `Executed ${intentResult.skill} skill`
+                            })
+                        });
+                        
+                        const ttsResult = await ttsResponse.json();
+                        if (ttsResult.audio_base64) {
+                            const audioData = `data:audio/wav;base64,${ttsResult.audio_base64}`;
+                            const audio = new Audio(audioData);
+                            audio.play().catch(e => console.error('Audio play error:', e));
+                        }
+                    }
+                    
+                    showAlert('✅ فرمان با موفقیت اجرا شد', 'success');
+                } else {
+                    addChatMessage(command, 'user');
+                    showAlert('فرمان دریافت شد (Auto Intent غیرفعال)', 'info');
+                }
+                
+            } catch (error) {
+                console.error('Command error:', error);
+                showAlert('خطا در ارسال فرمان: ' + error.message, 'error');
+            }
+        }
+
+        function addChatMessage(message, sender) {
+            const chatDemo = document.getElementById('chatDemo');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+            messageDiv.textContent = message;
+            chatDemo.appendChild(messageDiv);
+            chatDemo.scrollTop = chatDemo.scrollHeight;
+        }
+
+        function addResultToPanel(result) {
+            const resultsContent = document.getElementById('resultsContent');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-item';
+            
+            const skillName = document.createElement('div');
+            skillName.className = 'skill-name';
+            skillName.textContent = result.skill || 'Unknown';
+            
+            const resultContent = document.createElement('div');
+            resultContent.className = 'result-content';
+            resultContent.textContent = JSON.stringify(result.result || result, null, 2);
+            
+            resultDiv.appendChild(skillName);
+            resultDiv.appendChild(resultContent);
+            resultsContent.appendChild(resultDiv);
+            
+            resultsContent.scrollTop = resultsContent.scrollHeight;
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button onclick="this.parentElement.remove()" style="float: left; background: none; border: none; font-size: 1.2em; cursor: pointer;">×</button>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        function updateButtonState(buttonId, loading, text) {
+            const button = document.getElementById(buttonId);
+            if (loading) {
+                button.disabled = true;
+                button.innerHTML = `<span class="loading"></span> ${text}`;
+            } else {
+                button.disabled = false;
+                button.innerHTML = text;
+            }
+        }
+
+        async function refreshSystem() {
+            try {
+                showAlert('در حال بازنشانی سیستم...', 'info');
+                updateButtonState('refreshBtn', true, 'در حال بازنشانی...');
+                
+                // Force refresh system status
+                await checkSystemHealth();
+                
+                showAlert('✅ سیستم بازنشانی شد', 'success');
+                
+            } catch (error) {
+                showAlert('خطا در بازنشانی: ' + error.message, 'error');
+            } finally {
+                updateButtonState('refreshBtn', false, '<i class="fas fa-sync-alt"></i> بازنشانی');
+            }
+        }
+
+        function toggleVoice() {
+            if (!systemReady) {
+                showAlert('سیستم هنوز آماده نیست. لطفاً صبر کنید.', 'error');
+                return;
+            }
+
+            // For now, just show that voice interaction would work
+            showAlert('قابلیت تشخیص گفتار در حال توسعه است. از دکمه‌های تست استفاده کنید.', 'info');
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === ' ') {
+                e.preventDefault();
+                if (systemReady) {
+                    testRealTTS();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
