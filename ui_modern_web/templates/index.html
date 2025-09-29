@@ -14,18 +14,25 @@
     <button id="ping">Ping</button>
     <button id="ws">Open WS</button>
     <button id="send" disabled>Send "hello"</button>
+    <button id="wake">Wake</button>
   </div>
 
   <hr/>
 
-  <h3>STT (upload WAV → text) / Demo (text → echo)</h3>
+  <h3>Ask</h3>
+  <div class="row">
+    <input id="ask_text" type="text" placeholder="Ask (time, math, open url)"/>
+    <button id="ask">Send</button>
+  </div>
+
+  <h3>STT</h3>
   <div class="row">
     <input id="wavfile" type="file" accept="audio/wav"/>
-    <input id="stt_text" type="text" placeholder="Type demo text (optional)"/>
+    <input id="stt_text" type="text" placeholder="Demo text (optional)"/>
     <button id="stt">Transcribe / Echo</button>
   </div>
 
-  <h3>TTS (text → WAV)</h3>
+  <h3>TTS</h3>
   <div class="row">
     <input id="tts_text" type="text" placeholder="Type something"/>
     <input id="tts_voice" type="text" placeholder="Voice (optional)"/>
@@ -38,11 +45,16 @@
   <script>
   const backend = "{{ BACKEND_URL }}";
   const wsUrl = "{{ WS_URL }}/ws";
-  const log = (t)=>{ const el=document.getElementById('log'); el.textContent += t+"\n"; };
+  const log = (t)=>{ const el=document.getElementById('log'); el.textContent += t+"\\n"; };
 
   document.getElementById('ping').onclick = async ()=>{
     try{ const r = await fetch(backend + "/ping"); const j = await r.json(); log("ping: " + JSON.stringify(j)); }
     catch(e){ log("ping error"); }
+  };
+
+  document.getElementById('wake').onclick = async ()=>{
+    try{ const r = await fetch(backend + "/api/wake"); const j = await r.json(); log("wake: " + JSON.stringify(j)); }
+    catch(e){ log("wake error"); }
   };
 
   let sock=null;
@@ -66,17 +78,21 @@
     });
   }
 
+  document.getElementById('ask').onclick = async ()=>{
+    const text = document.getElementById('ask_text').value || "";
+    if(!text){ log("ask: empty"); return; }
+    const r = await fetch(backend + "/api/intent", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text})});
+    const j = await r.json();
+    log("intent: " + JSON.stringify(j));
+  };
+
   document.getElementById('stt').onclick = async ()=>{
     const f = document.getElementById('wavfile').files[0];
     const demoText = document.getElementById('stt_text').value;
     let body = {};
     if (demoText) body.text = demoText;
     if (f) body.audio_base64 = await fileToBase64(f);
-
-    const r = await fetch(backend + "/api/stt", {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
+    const r = await fetch(backend + "/api/stt", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const j = await r.json();
     log("stt: " + JSON.stringify(j));
   };
@@ -84,10 +100,7 @@
   document.getElementById('tts').onclick = async ()=>{
     const text = document.getElementById('tts_text').value || "Hello from Heystive";
     const voice = document.getElementById('tts_voice').value || null;
-    const r = await fetch(backend + "/api/tts", {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(voice ? {text, voice} : {text})
-    });
+    const r = await fetch(backend + "/api/tts", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(voice ? {text, voice} : {text})});
     const j = await r.json();
     if(j.audio_base64){
       const src = "data:audio/wav;base64," + j.audio_base64;
