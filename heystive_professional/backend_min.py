@@ -1,19 +1,22 @@
+import base64, time, json, os
+from typing import Optional
+from datetime import datetime, timezone
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime, timezone
-import time
-from typing import Optional
+try:
+    import webrtcvad
+except Exception:
+    webrtcvad = None
+
 from heystive_professional.intent_router import route_intent
 from heystive_professional.store import log_message
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-class State:
-    awake_until = 0.0
-
-state = State()
+AWAKE_UNTIL = 0.0
+WAKE_PHRASES = ["hey heystive", "hey steve", "heystive", "steve"]
 
 class STTIn(BaseModel):
     audio_base64: Optional[str] = None
@@ -40,8 +43,9 @@ def status():
 
 @app.get("/api/wake")
 def wake():
-    state.awake_until = time.time() + 10.0
-    return {"awake": True, "until": state.awake_until}
+    global AWAKE_UNTIL
+    AWAKE_UNTIL = time.time() + 10.0
+    return {"awake": True, "until": AWAKE_UNTIL}
 
 @app.post("/api/stt")
 def stt(payload: STTIn):
@@ -74,17 +78,101 @@ def tts(payload: TTSIn):
 
 @app.post("/api/intent")
 def intent(payload: IntentIn):
+    global AWAKE_UNTIL
     name, result = route_intent(payload.text, {})
     log_message("user", payload.text, name, result)
+    low = payload.text.lower()
+    if any(p in low for p in WAKE_PHRASES):
+        AWAKE_UNTIL = time.time() + 10.0
     return {"skill": name, "result": result}
 
 @app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
+async def ws_echo(ws: WebSocket):
     await ws.accept()
     try:
         while True:
             msg = await ws.receive_text()
             await ws.send_text(msg)
+    except WebSocketDisconnect:
+        pass
+
+@app.websocket("/ws/stream")
+async def ws_stream(ws: WebSocket):
+    global AWAKE_UNTIL
+    await ws.accept()
+    engine = None
+    sr = 16000
+    vad = None
+    speech_only = True
+    try:
+        while True:
+            raw = await ws.receive_text()
+            try:
+                data = json.loads(raw)
+            except Exception:
+                await ws.send_text(json.dumps({"type": "error", "note": "invalid json"}))
+                continue
+            t = data.get("type")
+            if t == "start":
+                sr = int(data.get("sr", 16000))
+                try:
+                    from heystive_professional.config import settings
+                    from heystive_professional.services.streaming_vosk import StreamingSTTEngine
+                    engine = StreamingSTTEngine(getattr(settings, "vosk_model_dir", "models/vosk-fa"), sr)
+                except Exception:
+                    engine = None
+                if webrtcvad:
+                    try:
+                        vad = webrtcvad.Vad(2)
+                    except Exception:
+                        vad = None
+                await ws.send_text(json.dumps({"type": "ack", "engine": "vosk" if engine and engine.enabled else "demo", "vad": bool(vad)}))
+            elif t == "chunk":
+                b64 = data.get("pcm_b64")
+                if not b64:
+                    continue
+                pcm = base64.b64decode(b64)
+                use = True
+                if vad:
+                    frame_ms = 20
+                    frame_len = int(sr * 2 * frame_ms / 1000)
+                    use = False
+                    i = 0
+                    while i + frame_len <= len(pcm):
+                        fr = pcm[i:i+frame_len]
+                        try:
+                            if vad.is_speech(fr, sr):
+                                use = True
+                                break
+                        except Exception:
+                            use = True
+                            break
+                        i += frame_len
+                if not use and speech_only:
+                    continue
+                if engine:
+                    part, final = engine.accept(pcm)
+                    if part:
+                        await ws.send_text(json.dumps({"type": "partial", "text": part}))
+                        low = part.lower()
+                        if any(p in low for p in WAKE_PHRASES):
+                            AWAKE_UNTIL = time.time() + 10.0
+                            await ws.send_text(json.dumps({"type": "wake", "until": AWAKE_UNTIL}))
+                    if final:
+                        await ws.send_text(json.dumps({"type": "final", "text": final}))
+                        low = final.lower()
+                        if any(p in low for p in WAKE_PHRASES):
+                            AWAKE_UNTIL = time.time() + 10.0
+                            await ws.send_text(json.dumps({"type": "wake", "until": AWAKE_UNTIL}))
+                else:
+                    await ws.send_text(json.dumps({"type": "partial", "text": ""}))
+            elif t == "stop":
+                if engine:
+                    txt = engine.finalize()
+                    await ws.send_text(json.dumps({"type": "final", "text": txt}))
+                break
+            else:
+                await ws.send_text(json.dumps({"type": "error", "note": "unknown type"}))
     except WebSocketDisconnect:
         pass
 

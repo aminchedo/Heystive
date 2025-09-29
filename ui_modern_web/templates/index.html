@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Heystive MVP</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/mic.js"></script>
 </head>
 <body>
   <h1>Heystive MVP</h1>
@@ -15,6 +16,11 @@
     <button id="ws">Open WS</button>
     <button id="send" disabled>Send "hello"</button>
     <button id="wake">Wake</button>
+  </div>
+
+  <div class="row">
+    <button id="mic_start">Start Mic</button>
+    <button id="mic_stop">Stop Mic</button>
   </div>
 
   <hr/>
@@ -45,6 +51,7 @@
   <script>
   const backend = "{{ BACKEND_URL }}";
   const wsUrl = "{{ WS_URL }}/ws";
+  const streamUrl = "{{ WS_URL }}/ws/stream";
   const log = (t)=>{ const el=document.getElementById('log'); el.textContent += t+"\\n"; };
 
   document.getElementById('ping').onclick = async ()=>{
@@ -67,6 +74,13 @@
   };
   document.getElementById('send').onclick = ()=>{
     if(sock && sock.readyState===1){ sock.send("hello"); }
+  };
+
+  document.getElementById('mic_start').onclick = ()=>{
+    window.HeystiveMic.startMic(streamUrl);
+  };
+  document.getElementById('mic_stop').onclick = ()=>{
+    window.HeystiveMic.stopMic();
   };
 
   async function fileToBase64(file){
