@@ -1,0 +1,5 @@
+{
+  "title": "File Write",
+  "permissions": ["fs.write"],
+  "entry": ["python3", "skill.py"]
+}

@@ -1,17 +1,18 @@
-import base64, time, json, os
-from typing import Optional
+import base64, time, json, os, sqlite3
+from typing import Optional, List, Dict
 from datetime import datetime, timezone
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 try:
     import webrtcvad
 except Exception:
     webrtcvad = None
-
-from heystive_professional.intent_router import route_intent
-from heystive_professional.store import log_message
-import sqlite3
+from heystive_professional.intent_router import route_intent, execute_plan
+from heystive_professional.store import log_message, DB_PATH
+from heystive_professional.brain import plan_text
+from heystive_professional.skills_registry import list_manifests, request_permission, grant_permission, exec_sandbox, is_granted
+from heystive_professional.memory import upsert as mem_upsert, search as mem_search
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -28,11 +29,22 @@ class TTSIn(BaseModel):
     voice: Optional[str] = None
 
 class IntentIn(BaseModel):
+    text: Optional[str] = None
+    plan: Optional[List[dict]] = None
+
+class BrainIn(BaseModel):
     text: str
+
+class PermissionGrantIn(BaseModel):
+    permission: str
+
+class SkillExecIn(BaseModel):
+    name: str
+    args: Dict
 
 def _status_payload():
     now_epoch = time.time()
-    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat()}
+    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat(), "awake_until": AWAKE_UNTIL}
 
 @app.get("/ping")
 def ping():
@@ -41,6 +53,55 @@ def ping():
 @app.get("/api/status")
 def status():
     return _status_payload()
+
+@app.get("/api/skills")
+def skills():
+    items = list_manifests()
+    return {"items": items}
+
+@app.post("/api/permissions/request")
+def perm_request(perm: PermissionGrantIn):
+    return request_permission(perm.permission)
+
+@app.post("/api/permissions/grant")
+def perm_grant(perm: PermissionGrantIn):
+    return grant_permission(perm.permission)
+
+@app.post("/api/skill/exec")
+def skill_exec(payload: SkillExecIn):
+    items = {m["name"]: m for m in list_manifests()}
+    m = items.get(payload.name)
+    if not m:
+        return {"ok": False, "error": "unknown_skill"}
+    required = m.get("permissions", [])
+    missing = [p for p in required if not is_granted(p)]
+    if missing:
+        return {"allowed": False, "required": missing}
+    entry = m.get("entry") or []
+    if not entry:
+        return {"ok": False, "error": "no_entry"}
+    code, out = exec_sandbox(entry, payload.args, timeout_s=3, skill_name=payload.name)
+    if code != 0:
+        return {"ok": False, "error": out or "exec_error"}
+    try:
+        j = json.loads(out)
+    except Exception:
+        return {"ok": False, "error": "bad_json"}
+    return j
+
+@app.post("/api/memory/upsert")
+def memory_upsert(data: Dict):
+    text = str(data.get("text",""))
+    tags = data.get("tags") or []
+    i = mem_upsert(text, tags)
+    return {"ok": True, "id": i}
+
+@app.post("/api/memory/search")
+def memory_search(data: Dict):
+    q = str(data.get("q",""))
+    limit = int(data.get("limit", 5))
+    res = mem_search(q, limit)
+    return {"results": res}
 
 @app.get("/api/wake")
 def wake():
@@ -79,36 +140,41 @@ def tts(payload: TTSIn):
 
 @app.post("/api/intent")
 def intent(payload: IntentIn):
-    global AWAKE_UNTIL
-    name, result = route_intent(payload.text, {})
-    log_message("user", payload.text, name, result)
-    low = payload.text.lower()
-    if any(p in low for p in WAKE_PHRASES):
-        AWAKE_UNTIL = time.time() + 10.0
-    return {"skill": name, "result": result}
+    if payload.plan:
+        results = execute_plan(payload.plan, {})
+        for step in results:
+            if "result" in step:
+                log_message("user", str(step["result"]), step["skill"], step["result"])
+        return {"skill": "plan", "results": results}
+    if payload.text:
+        name, result = route_intent(payload.text, {})
+        log_message("user", payload.text, name, result)
+        low = payload.text.lower()
+        if any(p in low for p in WAKE_PHRASES):
+            global AWAKE_UNTIL
+            AWAKE_UNTIL = time.time() + 10.0
+        return {"skill": name, "result": result}
+    return {"skill": "none", "result": {"message": "no input"}}
 
 @app.get("/api/logs")
-def get_logs(limit: int = 10, offset: int = 0):
-    try:
-        con = sqlite3.connect(os.environ.get("HEYSTIVE_DB", "heystive.db"))
-        cursor = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY ts DESC LIMIT ? OFFSET ?", (limit, offset))
-        rows = cursor.fetchall()
-        con.close()
-        
-        items = []
-        for row in rows:
-            items.append({
-                "id": row[0],
-                "timestamp": row[1],
-                "role": row[2],
-                "text": row[3],
-                "skill": row[4],
-                "result": json.loads(row[5]) if row[5] else {}
-            })
-        
-        return {"items": items, "limit": limit, "offset": offset, "count": len(items)}
-    except Exception as e:
-        return {"error": str(e), "items": []}
+def logs(limit: int = Query(20, ge=1, le=200)):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cur.fetchall()
+    con.close()
+    out = []
+    for r in rows:
+        try:
+            res = json.loads(r[5]) if r[5] else {}
+        except Exception:
+            res = {}
+        out.append({"id": r[0], "ts": r[1], "role": r[2], "text": r[3], "skill": r[4], "result": res})
+    return {"items": out}
+
+@app.post("/api/brain")
+def brain(payload: BrainIn):
+    engine, plan, message = plan_text(payload.text)
+    return {"engine": engine, "plan": plan, "message": message}
 
 @app.websocket("/ws")
 async def ws_echo(ws: WebSocket):
