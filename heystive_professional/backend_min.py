@@ -1,17 +1,16 @@
-import base64, time, json, os
-from typing import Optional
+import base64, time, json, os, sqlite3
+from typing import Optional, List
 from datetime import datetime, timezone
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 try:
     import webrtcvad
 except Exception:
     webrtcvad = None
-
-from heystive_professional.intent_router import route_intent
-from heystive_professional.store import log_message
-import sqlite3
+from heystive_professional.intent_router import route_intent, execute_plan
+from heystive_professional.store import log_message, DB_PATH
+from heystive_professional.brain import plan_text
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -28,11 +27,15 @@ class TTSIn(BaseModel):
     voice: Optional[str] = None
 
 class IntentIn(BaseModel):
+    text: Optional[str] = None
+    plan: Optional[List[dict]] = None
+
+class BrainIn(BaseModel):
     text: str
 
 def _status_payload():
     now_epoch = time.time()
-    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat()}
+    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat(), "awake_until": AWAKE_UNTIL}
 
 @app.get("/ping")
 def ping():
@@ -47,6 +50,26 @@ def wake():
     global AWAKE_UNTIL
     AWAKE_UNTIL = time.time() + 10.0
     return {"awake": True, "until": AWAKE_UNTIL}
+
+@app.get("/api/logs")
+def logs(limit: int = Query(20, ge=1, le=200)):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cur.fetchall()
+    con.close()
+    out = []
+    for r in rows:
+        try:
+            res = json.loads(r[5]) if r[5] else {}
+        except Exception:
+            res = {}
+        out.append({"id": r[0], "ts": r[1], "role": r[2], "text": r[3], "skill": r[4], "result": res})
+    return {"items": out}
+
+@app.post("/api/brain")
+def brain(payload: BrainIn):
+    engine, plan, message = plan_text(payload.text)
+    return {"engine": engine, "plan": plan, "message": message}
 
 @app.post("/api/stt")
 def stt(payload: STTIn):
@@ -80,35 +103,20 @@ def tts(payload: TTSIn):
 @app.post("/api/intent")
 def intent(payload: IntentIn):
     global AWAKE_UNTIL
-    name, result = route_intent(payload.text, {})
-    log_message("user", payload.text, name, result)
-    low = payload.text.lower()
-    if any(p in low for p in WAKE_PHRASES):
-        AWAKE_UNTIL = time.time() + 10.0
-    return {"skill": name, "result": result}
-
-@app.get("/api/logs")
-def get_logs(limit: int = 10, offset: int = 0):
-    try:
-        con = sqlite3.connect(os.environ.get("HEYSTIVE_DB", "heystive.db"))
-        cursor = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY ts DESC LIMIT ? OFFSET ?", (limit, offset))
-        rows = cursor.fetchall()
-        con.close()
-        
-        items = []
-        for row in rows:
-            items.append({
-                "id": row[0],
-                "timestamp": row[1],
-                "role": row[2],
-                "text": row[3],
-                "skill": row[4],
-                "result": json.loads(row[5]) if row[5] else {}
-            })
-        
-        return {"items": items, "limit": limit, "offset": offset, "count": len(items)}
-    except Exception as e:
-        return {"error": str(e), "items": []}
+    if payload.plan:
+        results = execute_plan(payload.plan, {})
+        for step in results:
+            if "result" in step:
+                log_message("user", str(step["result"]), step["skill"], step["result"])
+        return {"skill": "plan", "results": results}
+    if payload.text:
+        name, result = route_intent(payload.text, {})
+        log_message("user", payload.text, name, result)
+        low = payload.text.lower()
+        if any(p in low for p in WAKE_PHRASES):
+            AWAKE_UNTIL = time.time() + 10.0
+        return {"skill": name, "result": result}
+    return {"skill": "none", "result": {"message": "no input"}}
 
 @app.websocket("/ws")
 async def ws_echo(ws: WebSocket):
