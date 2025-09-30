@@ -1,0 +1,2 @@
+BLOCK_EXT=.log,.mp3
+BLOCK_DIR=.logs,legacy,heystive_professional/legacy,heystive_audio_output
