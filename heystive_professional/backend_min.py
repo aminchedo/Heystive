@@ -13,12 +13,17 @@ from heystive_professional.store import log_message, DB_PATH
 from heystive_professional.brain import plan_text
 from heystive_professional.skills_registry import list_manifests, request_permission, grant_permission, exec_sandbox, is_granted
 from heystive_professional.memory import upsert as mem_upsert, search as mem_search
+from heystive_professional.models_registry import list_models, register_model, download_model
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 AWAKE_UNTIL = 0.0
 WAKE_PHRASES = ["hey heystive", "hey steve", "heystive", "steve"]
+STT_ENGINE = os.environ.get("HEYSTIVE_STT_ENGINE", "auto")
+TTS_ENGINE = os.environ.get("HEYSTIVE_TTS_ENGINE", "auto")
+STT_MODEL_DIR = os.environ.get("HEYSTIVE_STT_MODEL", "models/whisper-tiny")
+TTS_MODEL_DIR = os.environ.get("HEYSTIVE_TTS_MODEL", "models/xtts")
 
 class STTIn(BaseModel):
     audio_base64: Optional[str] = None
@@ -42,6 +47,12 @@ class SkillExecIn(BaseModel):
     name: str
     args: Dict
 
+class ModelRegisterIn(BaseModel):
+    name: str
+    type: str
+    url: str
+    sha256: str
+
 def _status_payload():
     now_epoch = time.time()
     return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat(), "awake_until": AWAKE_UNTIL}
@@ -53,6 +64,18 @@ def ping():
 @app.get("/api/status")
 def status():
     return _status_payload()
+
+@app.get("/api/models/list")
+def models_list():
+    return {"items": list_models()}
+
+@app.post("/api/models/register")
+def models_register(body: ModelRegisterIn):
+    return register_model(body.name, body.type, body.url, body.sha256)
+
+@app.post("/api/models/download")
+def models_download(name: str):
+    return download_model(name)
 
 @app.get("/api/skills")
 def skills():
@@ -115,10 +138,18 @@ def stt(payload: STTIn):
         log_message("user", payload.text, "stt_demo", {"text": payload.text})
         return {"text": payload.text, "engine": "demo"}
     if payload.audio_base64:
+        if STT_ENGINE in ("auto","whisper"):
+            try:
+                from heystive_professional.services.stt_whisper import stt_wav_base64_whisper
+                text = stt_wav_base64_whisper(payload.audio_base64, STT_MODEL_DIR)
+                log_message("user", "<audio>", "stt_whisper", {"text": text})
+                return {"text": text, "engine": "whisper"}
+            except Exception as e:
+                pass
         try:
             from heystive_professional.services.stt_vosk import stt_wav_base64
             from heystive_professional.config import settings
-            text = stt_wav_base64(payload.audio_base64, settings.vosk_model_dir)
+            text = stt_wav_base64(payload.audio_base64, getattr(settings, "vosk_model_dir", "models/vosk-fa"))
             log_message("user", "<audio>", "stt_vosk", {"text": text})
             return {"text": text, "engine": "vosk"}
         except Exception as e:
@@ -128,10 +159,18 @@ def stt(payload: STTIn):
 
 @app.post("/api/tts")
 def tts(payload: TTSIn):
+    if TTS_ENGINE in ("auto","xtts"):
+        try:
+            from heystive_professional.services.tts_xtts import tts_generate_base64_xtts
+            audio_b64 = tts_generate_base64_xtts(payload.text, TTS_MODEL_DIR)
+            log_message("assistant", payload.text, "tts_xtts", {"bytes": len(audio_b64)})
+            return {"audio_base64": audio_b64, "engine": "xtts", "voice": payload.voice}
+        except Exception as e:
+            pass
     try:
         from heystive_professional.services.tts_pyttsx3 import tts_to_base64
         from heystive_professional.config import settings
-        audio_b64 = tts_to_base64(payload.text, settings.tts_tmp_dir)
+        audio_b64 = tts_to_base64(payload.text, getattr(settings, "tts_tmp_dir", "./.tmp_tts"))
         log_message("assistant", payload.text, "tts_pyttsx3", {"bytes": len(audio_b64)})
         return {"audio_base64": audio_b64, "engine": "pyttsx3", "voice": payload.voice}
     except Exception as e:
