@@ -6,7 +6,7 @@
 - [x] Phase 3 – Intent Router + Skills + Logs
 - [x] Phase 4 – Streaming Mic + VAD + Wake
 - [x] Phase 5 – Orchestrator (Auto-Intent/Speak) + Logs API + Notes
-- [ ] Phase 6 – Conversational Brain (+ Tool Use Gateway)
+- [x] Phase 6 – Conversational Brain (+ Tool Use Gateway)
 - [ ] Phase 7 – Plugin Sandbox (Permissions/Isolation)
 - [ ] Phase 8 – Memory & Retrieval (RAG-lite)
 - [ ] Phase 9 – STT/TTS Production-grade (models & downloader)
@@ -115,3 +115,5 @@
 - unchecked
 
 <!-- Phase 5 completed at 2025-09-29 15:47:43 UTC -->
+
+<!-- Phase 6 completed at 2025-09-30 01:06:10 UTC -->

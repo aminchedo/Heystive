@@ -7,7 +7,7 @@ def plan_text(text: str):
     if m:
         body = m.group(2).strip()
         plan.append({"skill":"note","args":{"text":"note "+body}})
-    urlm = re.search(r"(https?://[\\w\\.-]+[\\w\\-/\\.?=#%&+]*)", t, re.I)
+    urlm = re.search(r"(https?://[\w\.-]+[\w\-/\.?=#%&+]*)", t, re.I)
     if urlm:
         plan.append({"skill":"open_url","args":{"text":t}})
     if ("time" in low) or ("what time" in low) or ("clock" in low):
