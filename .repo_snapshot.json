@@ -1,0 +1,61 @@
+{
+  "timestamp": 1759224324,
+  "scripts": [
+    "scripts/dev_up.sh",
+    "scripts/dev_up_win.bat",
+    "scripts/service.sh",
+    "scripts/service_win.bat"
+  ],
+  "tools": [],
+  "templates": [
+    "ui_modern_web/templates/index.html"
+  ],
+  "requirements": [
+    "heystive_professional/requirements-core.txt",
+    "ui_modern_web/requirements-web.txt",
+    "ui_modern_desktop/requirements-desktop.txt"
+  ],
+  "phase_tracker_exists": true,
+  "phase_tracker_head": [
+    "# Heystive – Phase Tracker (Minimal)",
+    "",
+    "## Phase Checklist",
+    "- [x] Phase 1 – MVP boot",
+    "- [x] Phase 2 – Offline STT/TTS + Config",
+    "- [x] Phase 3 – Intent Router + Skills + Logs",
+    "- [x] Phase 4 – Streaming Mic + VAD + Wake",
+    "- [x] Phase 5 – Orchestrator + Logs API + Notes",
+    "- [x] Phase 6 – Conversational Brain (+ Tool Use)",
+    "- [x] Phase 7&8 – Plugin Sandbox + Memory (combined)",
+    "- [x] Phase 9 – STT/TTS Models & Downloader",
+    "- [x] Phase 10 – Packaging/Service/Settings",
+    "- [x] Phase 12 – QA/CI/CD (tests, builds, artifacts)",
+    "",
+    "---",
+    "",
+    "## Phase 10 – Packaging/Service/Settings",
+    "### Tasks",
+    "- [ ] Service runner: `scripts/service.sh` (Linux/macOS) و `scripts/service_win.bat` (Windows) با start/stop/restart/status و log rotation.",
+    "- [ ] Settings API: `GET /settings` (HTML non-empty) و `POST /api/settings` (JSON upsert در `settings.json`).",
+    "- [ ] Backend، روی start سرویس از `settings.json` بخونه (port/base urls).",
+    "### Quality Gates",
+    "- [ ] `scripts/service.sh start && sleep 1 && curl -fsS http://127.0.0.1:8000/ping` → `status:\"healthy\"`.",
+    "- [ ] `curl -fsS http://127.0.0.1:8000/settings` برمی‌گرده و non-empty است.",
+    "- [ ] `curl -fsS -X POST http://127.0.0.1:8000/api/settings -H \"Content-Type: application/json\" -d '{\"web\":{\"theme\":\"light\"},\"audio\":{\"sr\":16000}}'` → `{ok:true}` و فایل `settings.json` به‌روزشده.",
+    "- [ ] `scripts/service.sh stop` پردازش backend را متوقف می‌کند و فایل لاگ غیرخالی است.",
+    "### Completion",
+    "- unchecked",
+    "",
+    "---"
+  ],
+  "endpoints_sample": {
+    "ping": {
+      "_error": "<urlopen error [Errno 111] Connection refused>"
+    },
+    "models_list": {
+      "_error": "<urlopen error [Errno 111] Connection refused>"
+    },
+    "settings_head": "_error:<urlopen error [Errno 111] Connection refused>"
+  },
+  "tree_hash": "3b34f345f649047eed03655b28871b90c758bcb134b2a84fddbf40a17470e4bf"
+}
