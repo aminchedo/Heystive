@@ -1,1 +1,1 @@
-{"web": {"theme": "light"}, "audio": {"sr": 16000}, "server": {"host": "127.0.0.1", "port": 8000}}
+{"web": {"theme": "dark"}}

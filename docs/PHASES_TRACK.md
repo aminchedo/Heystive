@@ -10,7 +10,7 @@
 - [x] Phase 7&8 – Plugin Sandbox + Memory (combined)
 - [x] Phase 9 – STT/TTS Models & Downloader
 - [x] Phase 10 – Packaging/Service/Settings
-- [ ] Phase 12 – QA/CI/CD (tests, builds, artifacts)
+- [x] Phase 12 – QA/CI/CD (tests, builds, artifacts)
 
 ---
 
@@ -40,3 +40,5 @@
 - unchecked
 
 <!-- Phases 10 completed at 2025-09-30 01:29:10 UTC -->
+
+<!-- Phases 12 completed at 2025-09-30 01:29:50 UTC -->
