@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/workspace/heystive_professional/backend_min.py", line 4, in <module>
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, Request
+ModuleNotFoundError: No module named 'fastapi'
