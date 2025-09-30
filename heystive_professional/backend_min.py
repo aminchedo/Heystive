@@ -1,58 +1,53 @@
-import base64, time, json, os, sqlite3
+import base64, time, json, os
 from typing import Optional
 from datetime import datetime, timezone
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 try:
     import webrtcvad
 except Exception:
     webrtcvad = None
+
 from heystive_professional.intent_router import route_intent
-from heystive_professional.store import log_message, DB_PATH
+from heystive_professional.store import log_message
+import sqlite3
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 AWAKE_UNTIL = 0.0
 WAKE_PHRASES = ["hey heystive", "hey steve", "heystive", "steve"]
+
 class STTIn(BaseModel):
     audio_base64: Optional[str] = None
     text: Optional[str] = None
+
 class TTSIn(BaseModel):
     text: str
     voice: Optional[str] = None
+
 class IntentIn(BaseModel):
     text: str
+
 def _status_payload():
-    global AWAKE_UNTIL
     now_epoch = time.time()
-    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat(), "awake_until": AWAKE_UNTIL}
+    return {"status": "healthy", "message": "Heystive MVP Backend is running", "timestamp": now_epoch, "service": "heystive-backend", "ok": True, "ts": datetime.now(timezone.utc).isoformat()}
+
 @app.get("/ping")
 def ping():
     return _status_payload()
+
 @app.get("/api/status")
 def status():
     return _status_payload()
+
 @app.get("/api/wake")
 def wake():
     global AWAKE_UNTIL
     AWAKE_UNTIL = time.time() + 10.0
     return {"awake": True, "until": AWAKE_UNTIL}
-@app.get("/api/logs")
-def logs(limit: int = Query(20, ge=1, le=200)):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY id DESC LIMIT ?", (limit,))
-    rows = cur.fetchall()
-    con.close()
-    out = []
-    for r in rows:
-        try:
-            res = json.loads(r[5]) if r[5] else {}
-        except Exception:
-            res = {}
-        out.append({"id": r[0], "ts": r[1], "role": r[2], "text": r[3], "skill": r[4], "result": res})
-    return {"items": out}
+
 @app.post("/api/stt")
 def stt(payload: STTIn):
     if payload.text:
@@ -69,6 +64,7 @@ def stt(payload: STTIn):
             log_message("user", "<audio>", "stt_demo", {"note": str(e)})
             return {"text": "demo", "engine": "demo", "note": str(e)}
     return {"text": "", "engine": "demo", "note": "no input provided"}
+
 @app.post("/api/tts")
 def tts(payload: TTSIn):
     try:
@@ -80,15 +76,40 @@ def tts(payload: TTSIn):
     except Exception as e:
         log_message("assistant", payload.text, "tts_demo", {"note": str(e)})
         return {"ok": True, "text": payload.text, "engine": "demo", "note": str(e), "voice": payload.voice}
+
 @app.post("/api/intent")
 def intent(payload: IntentIn):
+    global AWAKE_UNTIL
     name, result = route_intent(payload.text, {})
     log_message("user", payload.text, name, result)
     low = payload.text.lower()
     if any(p in low for p in WAKE_PHRASES):
-        global AWAKE_UNTIL
         AWAKE_UNTIL = time.time() + 10.0
     return {"skill": name, "result": result}
+
+@app.get("/api/logs")
+def get_logs(limit: int = 10, offset: int = 0):
+    try:
+        con = sqlite3.connect(os.environ.get("HEYSTIVE_DB", "heystive.db"))
+        cursor = con.execute("SELECT id, ts, role, text, skill, result FROM messages ORDER BY ts DESC LIMIT ? OFFSET ?", (limit, offset))
+        rows = cursor.fetchall()
+        con.close()
+        
+        items = []
+        for row in rows:
+            items.append({
+                "id": row[0],
+                "timestamp": row[1],
+                "role": row[2],
+                "text": row[3],
+                "skill": row[4],
+                "result": json.loads(row[5]) if row[5] else {}
+            })
+        
+        return {"items": items, "limit": limit, "offset": offset, "count": len(items)}
+    except Exception as e:
+        return {"error": str(e), "items": []}
+
 @app.websocket("/ws")
 async def ws_echo(ws: WebSocket):
     await ws.accept()
@@ -98,6 +119,7 @@ async def ws_echo(ws: WebSocket):
             await ws.send_text(msg)
     except WebSocketDisconnect:
         pass
+
 @app.websocket("/ws/stream")
 async def ws_stream(ws: WebSocket):
     global AWAKE_UNTIL
@@ -177,6 +199,7 @@ async def ws_stream(ws: WebSocket):
                 await ws.send_text(json.dumps({"type": "error", "note": "unknown type"}))
     except WebSocketDisconnect:
         pass
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
