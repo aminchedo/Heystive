@@ -1,0 +1,13 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.build
+dist
+venv
+.env
+.logs
+.models_cache
+node_modules
+tests/__pycache__

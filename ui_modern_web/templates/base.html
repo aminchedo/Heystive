@@ -155,6 +155,11 @@
                     <!-- Connection Status -->
                     <span id="connection-status" class="badge badge-error">قطع شده</span>
                     
+                    <!-- Theme Toggle Button -->
+                    <button class="md-icon-button" id="theme-toggle" title="تغییر تم">
+                        <span>🌙</span>
+                    </button>
+                    
                     <!-- Settings Button -->
                     <button class="md-icon-button" onclick="window.location.href='/settings'" title="تنظیمات">
                         <span>⚙️</span>
@@ -234,6 +239,7 @@
     <script src="/static/js/voice-recorder.js"></script>
     <script src="/static/js/websocket-client.js"></script>
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/theme.js"></script>
     
     <!-- Additional JavaScript -->
     {% block extra_js %}{% endblock %}
