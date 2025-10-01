@@ -14,6 +14,7 @@ from store import log_message, DB_PATH
 from brain import plan_text
 from models_registry import list_models, register_model, download_model
 from settings_store import read_settings, write_settings
+from heystive.core.orchestrator import choose_stt, choose_tts
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 AWAKE_UNTIL = 0.0
@@ -81,21 +82,23 @@ def logs(limit: int = Query(20, ge=1, le=200)):
     return {"items": out}
 @app.post("/api/stt")
 def stt(payload: STTIn):
+    engine = choose_stt()
     if payload.text:
-        log_message("user", payload.text, "stt_demo", {"text": payload.text})
-        return {"text": payload.text, "engine": "demo"}
-    return {"text": "", "engine": "demo", "note": "no input provided"}
+        log_message("user", payload.text, f"stt_{engine}", {"text": payload.text})
+        return {"text": payload.text, "engine": engine}
+    return {"text": "", "engine": engine, "note": "no input provided"}
 @app.post("/api/tts")
 def tts(payload: TTSIn):
+    engine = choose_tts()
     try:
         from services.tts_pyttsx3 import tts_to_base64
         from config import settings
         audio_b64 = tts_to_base64(payload.text, getattr(settings, "tts_tmp_dir", "./.tmp_tts"))
-        log_message("assistant", payload.text, "tts_pyttsx3", {"bytes": len(audio_b64)})
-        return {"audio_base64": audio_b64, "engine": "pyttsx3", "voice": payload.voice}
+        log_message("assistant", payload.text, f"tts_{engine}", {"bytes": len(audio_b64)})
+        return {"audio_base64": audio_b64, "engine": engine, "voice": payload.voice}
     except Exception as e:
-        log_message("assistant", payload.text, "tts_demo", {"note": str(e)})
-        return {"ok": True, "text": payload.text, "engine": "demo", "note": str(e), "voice": payload.voice}
+        log_message("assistant", payload.text, f"tts_{engine}_fallback", {"note": str(e)})
+        return {"ok": True, "text": payload.text, "engine": engine, "note": str(e), "voice": payload.voice}
 @app.post("/api/intent")
 def intent(payload: Dict):
     text = payload.get("text")
