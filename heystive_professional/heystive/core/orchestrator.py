@@ -1,10 +1,14 @@
 import os
+from server.settings_store import load
 def choose_stt():
-    prefer = os.environ.get("HEYSTIVE_STT","auto")
-    if prefer == "vosk": return "vosk"
-    if prefer == "whisper": return "whisper"
-    return "vosk"
+    s = load()
+    return s.stt_engine
 def choose_tts():
-    prefer = os.environ.get("HEYSTIVE_TTS","auto")
-    if prefer == "pyttsx3": return "pyttsx3"
-    return "pyttsx3"
+    s = load()
+    return s.tts_engine
+def choose_llm():
+    s = load()
+    return s.llm_engine
+def model_path():
+    s = load()
+    return s.llm_model_path

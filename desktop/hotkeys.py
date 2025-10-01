@@ -1,5 +1,6 @@
 import threading
 from pynput import keyboard
+from server.settings_store import load
 class GlobalHotkeys:
     def __init__(self, on_toggle_listen=None, on_focus=None):
         self.on_toggle_listen = on_toggle_listen
@@ -7,6 +8,7 @@ class GlobalHotkeys:
         self.listener = None
     def _handler(self, key):
         try:
+            s = load()
             if key == keyboard.Key.space and self.ctrl and self.alt:
                 if self.on_toggle_listen:
                     self.on_toggle_listen()

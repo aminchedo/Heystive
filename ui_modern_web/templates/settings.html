@@ -1,0 +1,68 @@
+<!doctype html><html lang="fa" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تنظیمات هی‌استیو</title>
+<link rel="stylesheet" href="/static/style.css">
+</head><body>
+<main class="container">
+<h1>تنظیمات</h1>
+<form id="settings-form">
+<section>
+<h2>ظاهر</h2>
+<label>تم
+<select name="theme" id="theme">
+<option value="light">روشن</option>
+<option value="dark">تاریک</option>
+</select></label>
+</section>
+<section>
+<h2>صدا</h2>
+<label>STT
+<select name="stt_engine" id="stt_engine">
+<option value="vosk">Vosk (CPU)</option>
+<option value="whisper">Whisper</option>
+</select></label>
+<label>TTS
+<select name="tts_engine" id="tts_engine">
+<option value="pyttsx3">pyttsx3 (Local)</option>
+<option value="xtts">XTTS</option>
+</select></label>
+</section>
+<section>
+<h2>مغز</h2>
+<label>LLM
+<select name="llm_engine" id="llm_engine">
+<option value="llama_cpp">llama.cpp</option>
+</select></label>
+<label>مسیر مدل
+<input type="text" name="llm_model_path" id="llm_model_path" placeholder="models/llm/gguf/model.gguf">
+</label>
+</section>
+<section>
+<h2>میان‌بر</h2>
+<label>Toggle Listen
+<input type="text" name="hotkey_toggle" id="hotkey_toggle" placeholder="ctrl+alt+space">
+</label>
+</section>
+<section>
+<h2>اجازه‌ها</h2>
+<label>مسیرهای مجاز
+<textarea name="os_whitelist_paths" id="os_whitelist_paths" rows="3"></textarea>
+</label>
+<label>اپ‌های مجاز
+<textarea name="os_whitelist_apps" id="os_whitelist_apps" rows="2"></textarea>
+</label>
+</section>
+<section>
+<h2>سیستم</h2>
+<label>Log Level
+<select name="log_level" id="log_level">
+<option value="info">info</option>
+<option value="debug">debug</option>
+<option value="warning">warning</option>
+</select></label>
+</section>
+<button type="submit">ذخیره</button>
+</form>
+</main>
+<script src="/static/js/settings.js"></script>
+</body></html>
