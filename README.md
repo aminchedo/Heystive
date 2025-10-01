@@ -4,24 +4,39 @@ Heystive is a local-first Persian/English voice assistant with a FastAPI backend
 
 ## Quick Start
 
-### Linux/macOS
+### Desktop App (Recommended)
 ```bash
+# Start the desktop application
+python apps/desktop/main.py
+
+# Features:
+# - Modern Qt interface with Persian RTL support
+# - Toolbar with Listen, Mute, Logs, Models, Settings, Theme, Commands
+# - Right-to-left safe sidebar with system status
+# - Command palette (Ctrl+K) for executing server commands
+# - Non-blocking notifications
+# - Global hotkeys (Ctrl+Alt+Space to toggle listening)
+# - System tray integration
+```
+
+### Web Interface
+```bash
+# Linux/macOS
 bash scripts/dev_up.sh || sh scripts/dev_up.sh
 # Backend → http://127.0.0.1:8000  |  Web UI → http://127.0.0.1:5174
 curl -fsS http://127.0.0.1:8000/ping
-```
 
-### Windows
-```cmd
+# Windows
 scripts\dev_up_win.bat
 REM Backend → http://127.0.0.1:8000  |  Web UI → http://127.0.0.1:5174
 curl http://127.0.0.1:8000/ping
 ```
 
 ## Architecture Overview
-- **Backend (FastAPI):** `/ping`, `/api/status`, `/api/stt`, `/api/tts`, `/api/brain`, `/api/intent`, `/api/logs`, `/api/models/*`, `/settings`. SQLite is used for logs/memory where present.
+- **Backend (FastAPI):** `/ping`, `/api/status`, `/api/stt`, `/api/tts`, `/api/brain`, `/api/intent`, `/api/logs`, `/api/models/*`, `/api/commands/*`, `/settings`. SQLite is used for logs/memory where present.
+- **Desktop App (PySide6):** Modern Qt interface (`apps/desktop/main.py`) with toolbar, sidebar, command palette, and Persian RTL support.
 - **Web UI (FastAPI + Jinja):** `ui_modern_web/app.py` serves the interface (port 5174) with mic controls and streaming.
-- **Desktop UI (PySide6):** Optional GUI wrapper (`ui_modern_desktop/main_desktop.py`).
+- **Command System:** Registry-based command execution (`/api/commands/list`, `/api/commands/run`) with allowlists for security.
 - **Skills & Brain:** `heystive_professional/skills/*`, `heystive_professional/intent_router.py`, `heystive_professional/brain.py`.
 - **Streaming STT & VAD:** WebSocket `/ws/stream` with Vosk/Demo path and wake phrase handling.
 - **Models Registry:** `/api/models/register|download|list` with checksum verification (file:// supported).
@@ -38,6 +53,25 @@ bash scripts/dev_up.sh || sh scripts/dev_up.sh
 ```bash
 curl -fsS http://127.0.0.1:8000/ping
 curl -fsS http://127.0.0.1:8000/settings | head -n 5
+```
+
+### Command System
+```bash
+# List available commands
+curl http://127.0.0.1:8765/api/commands/list
+
+# Execute a command
+curl -X POST http://127.0.0.1:8765/api/commands/run \
+  -H "Content-Type: application/json" \
+  -d '{"name": "system.status", "args": {}}'
+
+# Available commands include:
+# - system.status: Get CPU/memory/platform info
+# - memory.search: Search knowledge base
+# - note.add/note.search: Manage notes
+# - files.search: Search files in whitelisted paths
+# - theme.toggle: Toggle light/dark theme
+# - intent.listen/intent.mute: Control voice listening
 ```
 
 ### WebSocket Streaming (overview)
