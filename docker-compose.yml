@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  heystive:
+    build: .
+    environment:
+      - LOG_DIR=/app/.logs
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./models:/app/models
+      - ./.logs:/app/.logs
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8765/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
