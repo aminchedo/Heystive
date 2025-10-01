@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, Q
 from PySide6.QtCore import QTimer
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from desktop.hotkeys import GlobalHotkeys
+from apps.desktop.hotkeys import GlobalHotkeys
 
 logging.basicConfig(filename="heystive_desktop.log", level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
