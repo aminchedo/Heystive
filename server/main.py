@@ -10,8 +10,10 @@ from server.errors import unhandled_exception_handler
 from server.metrics import metrics_handler
 from server.rag_lite import router as rag_router
 from server.os_skills import router as os_router
-from heystive_professional.backend_min import app as api_app
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+sys.path.append(str(ROOT / "heystive_professional"))
+from backend_min import app as api_app
 UI_TEMPLATES = ROOT / "ui_modern_web" / "templates"
 UI_STATIC = ROOT / "ui_modern_web" / "static"
 app = FastAPI()
