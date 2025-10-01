@@ -1,27 +1,72 @@
 """
 Modern Main Window Component for Heystive Desktop
-Material Design interface with Persian RTL support
+Material Design interface with Persian RTL support, toolbar, sidebar, and command palette
 """
 
 import sys
+import os
+import requests
+import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QFrame,
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QFrame,
     QLabel, QPushButton, QTextEdit, QScrollArea, QSplitter,
-    QGroupBox, QProgressBar, QSpacerItem, QSizePolicy
+    QGroupBox, QProgressBar, QSpacerItem, QSizePolicy, QToolBar,
+    QToolButton, QDialog, QLineEdit, QListWidget, QApplication,
+    QMessageBox, QSystemTrayIcon, QMenu, QStatusBar
 )
-from PySide6.QtCore import Qt, Signal, QTimer, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QFont, QPixmap, QIcon
+from PySide6.QtCore import Qt, Signal, QTimer, QPropertyAnimation, QEasingCurve, QThread, pyqtSignal
+from PySide6.QtGui import QFont, QPixmap, QIcon, QKeySequence, QAction, QShortcut
 
 from .voice_control_widget import VoiceControlWidget
 from .persian_text_widget import PersianTextWidget
 from .voice_visualizer import VoiceVisualizer
+from .command_palette import CommandPalette
 
-class ModernMainWindow(QWidget):
+class NotificationWidget(QFrame):
+    """Non-blocking notification widget"""
+    
+    def __init__(self, message: str, notification_type: str = "info", parent=None):
+        super().__init__(parent)
+        self.setFrameStyle(QFrame.StyledPanel)
+        self.setObjectName("notification")
+        self.setProperty("class", notification_type)
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(12, 8, 12, 8)
+        
+        # Icon
+        icon_map = {
+            "success": "✅",
+            "error": "❌", 
+            "warning": "⚠️",
+            "info": "ℹ️"
+        }
+        icon_label = QLabel(icon_map.get(notification_type, "ℹ️"))
+        icon_label.setFont(QFont("Arial", 14))
+        layout.addWidget(icon_label)
+        
+        # Message
+        message_label = QLabel(message)
+        message_label.setFont(QFont("Vazir", 10))
+        layout.addWidget(message_label)
+        
+        # Close button
+        close_btn = QPushButton("×")
+        close_btn.setMaximumSize(24, 24)
+        close_btn.clicked.connect(self.close)
+        layout.addWidget(close_btn)
+        
+        # Auto-close timer
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.close)
+        self.timer.start(3000)  # 3 seconds
+
+class ModernMainWindow(QMainWindow):
     """
-    Modern main window with Material Design and Persian support
+    Modern main window with Material Design, Persian support, toolbar, sidebar, and command palette
     """
     
     # Signals
@@ -35,93 +80,159 @@ class ModernMainWindow(QWidget):
         self.current_status = "آماده"
         self.system_info = {}
         self.conversation_history = []
-        
-        # Animations
-        self.status_animation = None
+        self.current_theme = "light"
+        self.backend_url = os.environ.get("BACKEND_URL", "http://127.0.0.1:8765")
         
         # Initialize UI
         self.init_ui()
-        self.setup_animations()
+        self.setup_shortcuts()
+        self.load_settings()
         
     def init_ui(self):
         """Initialize the user interface"""
+        self.setWindowTitle("دستیار صوتی استیو - رابط مدرن")
+        self.setMinimumSize(1000, 700)
+        
+        # Central widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        
         # Main layout
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(15)
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
         
-        # Create header
-        header_widget = self.create_header()
-        main_layout.addWidget(header_widget)
+        # Create toolbar
+        self.create_toolbar()
         
-        # Create main content area with tabs
+        # Create sidebar
+        sidebar = self.create_sidebar()
+        main_layout.addWidget(sidebar)
+        
+        # Create main content area
         content_widget = self.create_content_area()
         main_layout.addWidget(content_widget, 1)
         
         # Create status bar
-        status_widget = self.create_status_bar()
-        main_layout.addWidget(status_widget)
+        self.create_status_bar()
         
         # Apply styling
         self.apply_styling()
         
-    def create_header(self):
-        """Create application header"""
-        header_frame = QFrame()
-        header_frame.setFrameStyle(QFrame.StyledPanel)
-        header_frame.setMaximumHeight(80)
+    def create_toolbar(self):
+        """Create application toolbar"""
+        toolbar = QToolBar("Main Toolbar")
+        toolbar.setMovable(False)
+        toolbar.setFloatable(False)
+        self.addToolBar(toolbar)
         
-        header_layout = QHBoxLayout(header_frame)
-        header_layout.setContentsMargins(15, 10, 15, 10)
+        # Listen action
+        self.listen_action = QAction("🎤 گوش دادن", self)
+        self.listen_action.setCheckable(True)
+        self.listen_action.triggered.connect(self.toggle_listen)
+        toolbar.addAction(self.listen_action)
         
-        # Logo and title
-        logo_label = QLabel()
-        logo_pixmap = QPixmap(str(Path(__file__).parent.parent / "resources" / "icons" / "heystive_logo.png"))
-        if not logo_pixmap.isNull():
-            logo_label.setPixmap(logo_pixmap.scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        else:
-            logo_label.setText("🎤")
-            logo_label.setFont(QFont("Arial", 24))
+        # Mute action
+        self.mute_action = QAction("🔇 قطع صدا", self)
+        self.mute_action.triggered.connect(self.mute_listening)
+        toolbar.addAction(self.mute_action)
         
-        title_label = QLabel("دستیار صوتی استیو")
-        title_label.setFont(QFont("Vazir", 18, QFont.Bold))
-        title_label.setAlignment(Qt.AlignCenter)
+        toolbar.addSeparator()
         
-        subtitle_label = QLabel("رابط کاربری مدرن")
-        subtitle_label.setFont(QFont("Vazir", 10))
-        subtitle_label.setStyleSheet("color: #718096;")
-        subtitle_label.setAlignment(Qt.AlignCenter)
+        # Logs action
+        logs_action = QAction("📋 گزارشات", self)
+        logs_action.triggered.connect(self.open_logs)
+        toolbar.addAction(logs_action)
         
-        # Title container
-        title_container = QWidget()
-        title_layout = QVBoxLayout(title_container)
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(0)
-        title_layout.addWidget(title_label)
-        title_layout.addWidget(subtitle_label)
+        # Models action
+        models_action = QAction("🤖 مدل‌ها", self)
+        models_action.triggered.connect(self.open_models)
+        toolbar.addAction(models_action)
         
-        # Status indicator
-        self.status_label = QLabel(self.current_status)
-        self.status_label.setFont(QFont("Vazir", 10))
-        self.status_label.setStyleSheet("""
-            QLabel {
-                background-color: #4CAF50;
-                color: white;
-                padding: 5px 15px;
-                border-radius: 15px;
-                font-weight: bold;
-            }
-        """)
-        self.status_label.setAlignment(Qt.AlignCenter)
+        toolbar.addSeparator()
         
-        # Layout
-        header_layout.addWidget(logo_label)
-        header_layout.addSpacing(15)
-        header_layout.addWidget(title_container)
-        header_layout.addStretch()
-        header_layout.addWidget(self.status_label)
+        # Settings action
+        settings_action = QAction("⚙️ تنظیمات", self)
+        settings_action.triggered.connect(self.open_settings)
+        toolbar.addAction(settings_action)
         
-        return header_frame
+        # Theme action
+        self.theme_action = QAction("🌙 تم تاریک", self)
+        self.theme_action.triggered.connect(self.toggle_theme)
+        toolbar.addAction(self.theme_action)
+        
+        toolbar.addSeparator()
+        
+        # Commands action
+        commands_action = QAction("⌘ دستورات", self)
+        commands_action.triggered.connect(self.open_command_palette)
+        toolbar.addAction(commands_action)
+        
+    def create_sidebar(self):
+        """Create right-to-left safe sidebar"""
+        sidebar = QFrame()
+        sidebar.setObjectName("sidebar")
+        sidebar.setMaximumWidth(250)
+        sidebar.setMinimumWidth(200)
+        
+        layout = QVBoxLayout(sidebar)
+        layout.setContentsMargins(10, 20, 10, 20)
+        layout.setSpacing(10)
+        
+        # System status section
+        status_group = QGroupBox("وضعیت سیستم")
+        status_layout = QVBoxLayout(status_group)
+        
+        self.cpu_label = QLabel("پردازنده: 0%")
+        self.memory_label = QLabel("حافظه: 0%")
+        self.disk_label = QLabel("دیسک: 0%")
+        
+        for label in [self.cpu_label, self.memory_label, self.disk_label]:
+            label.setFont(QFont("Vazir", 9))
+            status_layout.addWidget(label)
+        
+        layout.addWidget(status_group)
+        
+        # Quick toggles section
+        toggles_group = QGroupBox("تنظیمات سریع")
+        toggles_layout = QVBoxLayout(toggles_group)
+        
+        self.auto_listen_btn = QPushButton("گوش دادن خودکار")
+        self.auto_listen_btn.setCheckable(True)
+        self.auto_listen_btn.clicked.connect(self.toggle_auto_listen)
+        
+        self.notifications_btn = QPushButton("اعلان‌ها")
+        self.notifications_btn.setCheckable(True)
+        self.notifications_btn.setChecked(True)
+        self.notifications_btn.clicked.connect(self.toggle_notifications)
+        
+        self.rtl_btn = QPushButton("راست به چپ")
+        self.rtl_btn.setCheckable(True)
+        self.rtl_btn.setChecked(True)
+        self.rtl_btn.clicked.connect(self.toggle_rtl)
+        
+        for btn in [self.auto_listen_btn, self.notifications_btn, self.rtl_btn]:
+            btn.setFont(QFont("Vazir", 9))
+            toggles_layout.addWidget(btn)
+        
+        layout.addWidget(toggles_group)
+        
+        # Connection status
+        connection_group = QGroupBox("وضعیت اتصال")
+        connection_layout = QVBoxLayout(connection_group)
+        
+        self.backend_status = QLabel("Backend: قطع شده")
+        self.api_status = QLabel("API: قطع شده")
+        
+        for label in [self.backend_status, self.api_status]:
+            label.setFont(QFont("Vazir", 9))
+            connection_layout.addWidget(label)
+        
+        layout.addWidget(connection_group)
+        
+        layout.addStretch()
+        
+        return sidebar
         
     def create_content_area(self):
         """Create main content area with tabs"""
@@ -257,21 +368,6 @@ class ModernMainWindow(QWidget):
         
         system_layout.addWidget(assistant_group)
         
-        # Connection status
-        connection_group = QGroupBox("وضعیت اتصال")
-        connection_layout = QVBoxLayout(connection_group)
-        
-        self.backend_status = QLabel("Backend: قطع شده")
-        self.backend_status.setFont(QFont("Vazir", 10))
-        
-        self.api_status = QLabel("API: قطع شده")
-        self.api_status.setFont(QFont("Vazir", 10))
-        
-        connection_layout.addWidget(self.backend_status)
-        connection_layout.addWidget(self.api_status)
-        
-        system_layout.addWidget(connection_group)
-        
         system_layout.addStretch()
         
         return system_widget
@@ -349,24 +445,23 @@ class ModernMainWindow(QWidget):
         
     def create_status_bar(self):
         """Create status bar"""
-        status_frame = QFrame()
-        status_frame.setFrameStyle(QFrame.StyledPanel)
-        status_frame.setMaximumHeight(40)
-        
-        status_layout = QHBoxLayout(status_frame)
-        status_layout.setContentsMargins(15, 5, 15, 5)
+        status_bar = QStatusBar()
+        self.setStatusBar(status_bar)
         
         # Connection indicator
         self.connection_indicator = QLabel("🔴 قطع شده")
         self.connection_indicator.setFont(QFont("Vazir", 9))
+        status_bar.addWidget(self.connection_indicator)
         
         # Voice status
         self.voice_status_indicator = QLabel("🎤 آماده")
         self.voice_status_indicator.setFont(QFont("Vazir", 9))
+        status_bar.addWidget(self.voice_status_indicator)
         
         # Time
         self.time_label = QLabel()
         self.time_label.setFont(QFont("Vazir", 9))
+        status_bar.addPermanentWidget(self.time_label)
         
         # Update time
         self.time_timer = QTimer()
@@ -374,138 +469,155 @@ class ModernMainWindow(QWidget):
         self.time_timer.start(1000)
         self.update_time()
         
-        status_layout.addWidget(self.connection_indicator)
-        status_layout.addSpacing(20)
-        status_layout.addWidget(self.voice_status_indicator)
-        status_layout.addStretch()
-        status_layout.addWidget(self.time_label)
-        
-        return status_frame
-        
-    def setup_animations(self):
-        """Setup UI animations"""
-        # Status label animation
-        self.status_animation = QPropertyAnimation(self.status_label, b"geometry")
-        self.status_animation.setDuration(300)
-        self.status_animation.setEasingCurve(QEasingCurve.OutCubic)
+    def setup_shortcuts(self):
+        """Setup keyboard shortcuts"""
+        # Command palette shortcut
+        self.cmd_palette_shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        self.cmd_palette_shortcut.activated.connect(self.open_command_palette)
         
     def apply_styling(self):
-        """Apply custom styling"""
-        self.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #E0E0E0;
-                border-radius: 8px;
-                background-color: white;
-            }
-            
-            QTabWidget::tab-bar {
-                alignment: center;
-            }
-            
-            QTabBar::tab {
-                background-color: #F5F5F5;
-                color: #333333;
-                padding: 8px 16px;
-                margin: 2px;
-                border-radius: 4px;
-                font-family: 'Vazir';
-                font-size: 10pt;
-            }
-            
-            QTabBar::tab:selected {
-                background-color: #1565C0;
-                color: white;
-            }
-            
-            QTabBar::tab:hover {
-                background-color: #E3F2FD;
-            }
-            
-            QGroupBox {
-                font-family: 'Vazir';
-                font-size: 11pt;
-                font-weight: bold;
-                color: #333333;
-                border: 2px solid #E0E0E0;
-                border-radius: 8px;
-                margin: 10px 0px;
-                padding-top: 10px;
-            }
-            
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px 0 5px;
-                background-color: white;
-            }
-            
-            QPushButton {
-                font-family: 'Vazir';
-                font-size: 10pt;
-                padding: 8px 16px;
-                border: none;
-                border-radius: 6px;
-                background-color: #1565C0;
-                color: white;
-                font-weight: bold;
-            }
-            
-            QPushButton:hover {
-                background-color: #0D47A1;
-                transform: translateY(-1px);
-            }
-            
-            QPushButton:pressed {
-                background-color: #0A3D91;
-            }
-            
-            QProgressBar {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                text-align: center;
-                font-family: 'Vazir';
-                font-size: 9pt;
-            }
-            
-            QProgressBar::chunk {
-                background-color: #4CAF50;
-                border-radius: 3px;
-            }
-        """)
+        """Apply custom styling from stylesheet"""
+        stylesheet_path = Path(__file__).parent.parent / "assets" / "style.qss"
+        if stylesheet_path.exists():
+            with open(stylesheet_path, 'r', encoding='utf-8') as f:
+                self.setStyleSheet(f.read())
         
+    def load_settings(self):
+        """Load settings from backend"""
+        try:
+            response = requests.get(f"{self.backend_url}/api/settings", timeout=5)
+            if response.status_code == 200:
+                settings = response.json()
+                self.current_theme = settings.get("theme", "light")
+                self.apply_theme()
+                self.show_notification("تنظیمات بارگذاری شد", "success")
+        except Exception as e:
+            self.show_notification(f"خطا در بارگذاری تنظیمات: {str(e)}", "error")
+            
+    def apply_theme(self):
+        """Apply current theme"""
+        if self.current_theme == "dark":
+            self.setProperty("darkTheme", True)
+            self.theme_action.setText("☀️ تم روشن")
+        else:
+            self.setProperty("darkTheme", False)
+            self.theme_action.setText("🌙 تم تاریک")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        
+    def show_notification(self, message: str, notification_type: str = "info"):
+        """Show non-blocking notification"""
+        notification = NotificationWidget(message, notification_type, self)
+        notification.move(self.width() - notification.width() - 20, 50)
+        notification.show()
+        
+        # Auto-remove after animation
+        QTimer.singleShot(3000, notification.deleteLater)
+        
+    # Toolbar Actions
+    def toggle_listen(self):
+        """Toggle listening state"""
+        try:
+            if self.listen_action.isChecked():
+                response = requests.post(f"{self.backend_url}/api/intent", 
+                                       json={"text": "listen"}, timeout=5)
+                if response.status_code == 200:
+                    self.show_notification("گوش دادن شروع شد", "success")
+                    self.voice_visualizer.start_listening()
+                else:
+                    self.show_notification("خطا در شروع گوش دادن", "error")
+                    self.listen_action.setChecked(False)
+            else:
+                response = requests.post(f"{self.backend_url}/api/intent", 
+                                       json={"text": "mute"}, timeout=5)
+                if response.status_code == 200:
+                    self.show_notification("گوش دادن متوقف شد", "info")
+                    self.voice_visualizer.stop_listening()
+        except Exception as e:
+            self.show_notification(f"خطا: {str(e)}", "error")
+            self.listen_action.setChecked(False)
+            
+    def mute_listening(self):
+        """Mute listening"""
+        try:
+            response = requests.post(f"{self.backend_url}/api/intent", 
+                                   json={"text": "mute"}, timeout=5)
+            if response.status_code == 200:
+                self.show_notification("صدا قطع شد", "info")
+                self.listen_action.setChecked(False)
+                self.voice_visualizer.stop_listening()
+        except Exception as e:
+            self.show_notification(f"خطا: {str(e)}", "error")
+            
+    def open_logs(self):
+        """Open logs in browser"""
+        import webbrowser
+        webbrowser.open(f"{self.backend_url}/api/logs")
+        
+    def open_models(self):
+        """Open models in browser"""
+        import webbrowser
+        webbrowser.open(f"{self.backend_url}/api/models")
+        
+    def open_settings(self):
+        """Open settings in browser"""
+        import webbrowser
+        webbrowser.open(f"{self.backend_url}/settings")
+        
+    def toggle_theme(self):
+        """Toggle theme"""
+        try:
+            new_theme = "dark" if self.current_theme == "light" else "light"
+            response = requests.put(f"{self.backend_url}/api/settings", 
+                                  json={"theme": new_theme}, timeout=5)
+            if response.status_code == 200:
+                self.current_theme = new_theme
+                self.apply_theme()
+                self.show_notification(f"تم به {new_theme} تغییر کرد", "success")
+            else:
+                self.show_notification("خطا در تغییر تم", "error")
+        except Exception as e:
+            self.show_notification(f"خطا: {str(e)}", "error")
+            
+    def open_command_palette(self):
+        """Open command palette"""
+        palette = CommandPalette(self)
+        palette.exec()
+        
+    # Sidebar Actions
+    def toggle_auto_listen(self):
+        """Toggle auto listen"""
+        if self.auto_listen_btn.isChecked():
+            self.show_notification("گوش دادن خودکار فعال شد", "info")
+        else:
+            self.show_notification("گوش دادن خودکار غیرفعال شد", "info")
+            
+    def toggle_notifications(self):
+        """Toggle notifications"""
+        if self.notifications_btn.isChecked():
+            self.show_notification("اعلان‌ها فعال شد", "info")
+        else:
+            self.show_notification("اعلان‌ها غیرفعال شد", "info")
+            
+    def toggle_rtl(self):
+        """Toggle RTL layout"""
+        if self.rtl_btn.isChecked():
+            self.setLayoutDirection(Qt.RightToLeft)
+            self.show_notification("راست به چپ فعال شد", "info")
+        else:
+            self.setLayoutDirection(Qt.LeftToRight)
+            self.show_notification("چپ به راست فعال شد", "info")
+            
     # Public Methods
     def set_status(self, status: str):
         """Set application status"""
         self.current_status = status
-        self.status_label.setText(status)
-        
-        # Update status color based on content
-        if "خطا" in status:
-            color = "#F44336"  # Red
-        elif "پردازش" in status or "ضبط" in status:
-            color = "#FF9800"  # Orange
-        else:
-            color = "#4CAF50"  # Green
-            
-        self.status_label.setStyleSheet(f"""
-            QLabel {{
-                background-color: {color};
-                color: white;
-                padding: 5px 15px;
-                border-radius: 15px;
-                font-weight: bold;
-            }}
-        """)
-        
         self.status_changed.emit(status)
         
     def display_response(self, response: str):
         """Display assistant response"""
         self.response_display.setText(response)
-        
-        # Add to conversation history
         self.add_to_conversation("استیو", response)
-        
         self.response_displayed.emit(response)
         
     def add_to_conversation(self, speaker: str, message: str):
@@ -541,16 +653,19 @@ class ModernMainWindow(QWidget):
             cpu_value = int(system_info['cpu_usage'].replace('%', ''))
             self.cpu_progress.progress.setValue(cpu_value)
             self.cpu_progress.value_label.setText(system_info['cpu_usage'])
+            self.cpu_label.setText(f"پردازنده: {system_info['cpu_usage']}")
             
         if 'memory_usage' in system_info:
             memory_value = int(system_info['memory_usage'].replace('%', ''))
             self.memory_progress.progress.setValue(memory_value)
             self.memory_progress.value_label.setText(system_info['memory_usage'])
+            self.memory_label.setText(f"حافظه: {system_info['memory_usage']}")
             
         if 'disk_usage' in system_info:
             disk_value = int(system_info['disk_usage'].replace('%', ''))
             self.disk_progress.progress.setValue(disk_value)
             self.disk_progress.value_label.setText(system_info['disk_usage'])
+            self.disk_label.setText(f"دیسک: {system_info['disk_usage']}")
             
         # Update assistant status
         voice_assistant = info.get('voice_assistant', {})
@@ -590,13 +705,13 @@ class ModernMainWindow(QWidget):
         if text:
             clipboard = QApplication.clipboard()
             clipboard.setText(text)
-            self.set_status("متن کپی شد")
+            self.show_notification("متن کپی شد", "success")
             
     def clear_conversation(self):
         """Clear conversation history"""
         self.conversation_display.clear()
         self.conversation_history.clear()
-        self.set_status("تاریخچه پاک شد")
+        self.show_notification("تاریخچه پاک شد", "info")
         
     def update_time(self):
         """Update time display"""

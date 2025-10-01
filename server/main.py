@@ -10,6 +10,7 @@ from server.errors import unhandled_exception_handler
 from server.metrics import metrics_handler
 from server.rag_lite import router as rag_router
 from server.os_skills import router as os_router
+from server.commands import router as commands_router
 ROOT = Path(__file__).resolve().parents[1]
 import sys
 sys.path.append(str(ROOT / "heystive_professional"))
@@ -25,6 +26,7 @@ app.mount("/static", StaticFiles(directory=str(UI_STATIC)), name="static")
 app.mount("/api", api_app)
 app.include_router(rag_router, prefix="/api/memory", tags=["memory"])
 app.include_router(os_router, prefix="/api/os", tags=["os"])
+app.include_router(commands_router, prefix="/api/commands", tags=["commands"])
 @app.get("/healthz", response_class=JSONResponse)
 def healthz():
     return {"ok": True}
