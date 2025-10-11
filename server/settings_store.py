@@ -24,6 +24,11 @@ class Settings(BaseModel):
     voice_enabled: bool = True
     tts_enabled: bool = True
     stt_enabled: bool = True
+    # Wake-word configuration
+    wakeword_enabled: bool = True
+    wakeword_keyword: str = "hey steve"
+    wakeword_sensitivity: float = 0.5
+    wakeword_device_index: int = None
 
 def read_settings() -> Dict[str, Any]:
     """Read settings from file"""
