@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional, List
 import time
 import json
 from pathlib import Path
+from .secure_subprocess import SecureSubprocess
 
 logger = logging.getLogger(__name__)
 
@@ -134,9 +135,8 @@ class SystemPerformanceMonitor:
             
             # Check for NVIDIA GPU
             try:
-                # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
-                result = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv,noheader,nounits'], 
-                                      capture_output=True, text=True, timeout=5)
+                result = SecureSubprocess.safe_run(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv,noheader,nounits'],
+                                      timeout=5, capture_output=True, text=True)
                 if result.returncode == 0:
                     lines = result.stdout.strip().split('\n')
                     if lines and lines[0]:
@@ -150,9 +150,8 @@ class SystemPerformanceMonitor:
             # Check for AMD GPU
             if not gpu_info["available"]:
                 try:
-                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
-                    result = subprocess.run(['rocm-smi', '--showmeminfo', 'vram'], 
-                                          capture_output=True, text=True, timeout=5)
+                    result = SecureSubprocess.safe_run(['rocm-smi', '--showmeminfo', 'vram'],
+                                          timeout=5, capture_output=True, text=True)
                     if result.returncode == 0:
                         gpu_info["available"] = True
                         gpu_info["type"] = "amd"
@@ -162,9 +161,8 @@ class SystemPerformanceMonitor:
             # Check for Intel GPU
             if not gpu_info["available"]:
                 try:
-                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security  
-                    result = subprocess.run(['intel_gpu_top', '-l'], 
-                                          capture_output=True, text=True, timeout=5)
+                    result = SecureSubprocess.safe_run(['intel_gpu_top', '-l'],
+                                          timeout=5, capture_output=True, text=True)
                     if result.returncode == 0:
                         gpu_info["available"] = True
                         gpu_info["type"] = "intel"
@@ -205,9 +203,8 @@ class SystemPerformanceMonitor:
             if network_info["connected"]:
                 try:
                     # Simple ping test
-                    # TODO: Consider migrating to SecureSubprocess.safe_run() for enhanced security
-                    result = subprocess.run(['ping', '-c', '1', '8.8.8.8'], 
-                                          capture_output=True, text=True, timeout=5)
+                    result = SecureSubprocess.safe_run(['ping', '-c', '1', '8.8.8.8'],
+                                          timeout=5, capture_output=True, text=True)
                     if result.returncode == 0:
                         # Extract latency from ping output
                         output = result.stdout

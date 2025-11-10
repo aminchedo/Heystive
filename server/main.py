@@ -23,10 +23,11 @@ app.add_middleware(RequestLoggerMiddleware)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 templates = Jinja2Templates(directory=str(UI_TEMPLATES))
 app.mount("/static", StaticFiles(directory=str(UI_STATIC)), name="static")
-app.mount("/api", api_app)
+# Include routers BEFORE mounting api_app to avoid route shadowing
 app.include_router(rag_router, prefix="/api/memory", tags=["memory"])
 app.include_router(os_router, prefix="/api/os", tags=["os"])
 app.include_router(commands_router, prefix="/api/commands", tags=["commands"])
+app.mount("/api", api_app)
 @app.get("/healthz", response_class=JSONResponse)
 def healthz():
     return {"ok": True}
