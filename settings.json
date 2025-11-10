@@ -1,1 +1,26 @@
-{"web": {"theme": "dark"}}
+{
+  "theme": "dark",
+  "os_whitelist_paths": [
+    "/tmp",
+    "/home",
+    "/workspace"
+  ],
+  "os_whitelist_apps": [
+    "notepad",
+    "gedit",
+    "code",
+    "firefox",
+    "chrome"
+  ],
+  "auto_listen": false,
+  "notifications": true,
+  "rtl_support": true,
+  "language": "fa",
+  "voice_enabled": true,
+  "tts_enabled": true,
+  "stt_enabled": true,
+  "wakeword_enabled": true,
+  "wakeword_keyword": "hey steve",
+  "wakeword_sensitivity": 0.5,
+  "wakeword_device_index": null
+}
